@@ -48,7 +48,7 @@ export default function AddOrderForm({ onOrderAdded }) {
         disabled={submitting}
         aria-label="Numele comenzii"
       />
-      <button className="add-form-btn" type="submit" disabled={submitting}>
+      <button className="add-form-btn" type="submit" disabled={submitting} style={{ flexShrink: 0 }}>
         {submitting ? 'Se adaugă…' : 'Adaugă comandă'}
       </button>
       {error && <span className="add-form-error">{error}</span>}

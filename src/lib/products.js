@@ -9,6 +9,7 @@ function parseRow(row) {
     orderId: row.order_id,
     name: row.name,
     status: row.status,
+    templateId: row.template_id ?? null,
     createdAt: row.created_at,
   };
 }
@@ -20,18 +21,21 @@ function getProductsByOrder(orderId) {
   return rows.map(parseRow);
 }
 
-function createProduct(orderId, name) {
+function createProduct(orderId, name, templateId = null) {
   const db = getDb();
   const now = new Date().toISOString();
   const id = crypto.randomUUID();
-  db.prepare('INSERT INTO products (id, order_id, name, status, created_at) VALUES (?, ?, ?, ?, ?)').run(
-    id,
-    orderId,
-    name,
-    'de_facut',
-    now
-  );
+  db.prepare(
+    'INSERT INTO products (id, order_id, name, status, template_id, created_at) VALUES (?, ?, ?, ?, ?, ?)'
+  ).run(id, orderId, name, 'de_facut', templateId, now);
   return parseRow(db.prepare('SELECT * FROM products WHERE id = ?').get(id));
+}
+
+function createProductFromTemplate(orderId, templateId) {
+  const { getById } = require('./productTemplates.js');
+  const template = getById(templateId);
+  if (!template) return null;
+  return createProduct(orderId, template.name, templateId);
 }
 
 function updateProductStatus(productId, status) {
@@ -47,4 +51,4 @@ function deleteProduct(productId) {
   return result.changes > 0;
 }
 
-module.exports = { getProductsByOrder, createProduct, updateProductStatus, deleteProduct, VALID_STAGES };
+module.exports = { getProductsByOrder, createProduct, createProductFromTemplate, updateProductStatus, deleteProduct, VALID_STAGES };

@@ -6,8 +6,9 @@ jest.mock('../../../src/lib/db.js', () => {
   return { getDb: () => testDb, openDb };
 });
 
-const { getProductsByOrder, createProduct, updateProductStatus, deleteProduct } = require('../../../src/lib/products.js');
+const { getProductsByOrder, createProduct, updateProductStatus, deleteProduct, createProductFromTemplate } = require('../../../src/lib/products.js');
 const { createOrder } = require('../../../src/lib/orders.js');
+const { create: createTemplate } = require('../../../src/lib/productTemplates.js');
 
 let db;
 beforeAll(() => {
@@ -17,6 +18,7 @@ beforeAll(() => {
 beforeEach(() => {
   db.exec('DELETE FROM products');
   db.exec('DELETE FROM orders');
+  db.exec('DELETE FROM product_templates');
 });
 
 // ── getProductsByOrder ───────────────────────────────────────────
@@ -68,6 +70,37 @@ describe('createProduct', () => {
     expect(product.name).toBe('Invitații');
     expect(product.status).toBe('de_facut');
     expect(product.createdAt).toBeTruthy();
+  });
+
+  it('response shape includes templateId field (null when not provided)', () => {
+    const order = createOrder('TemplateId Shape');
+    const product = createProduct(order.id, 'Meniu');
+    expect(product).toHaveProperty('templateId', null);
+  });
+
+  it('stores templateId when provided', () => {
+    const order = createOrder('With Template');
+    const template = createTemplate('Invitație clasică', null);
+    const product = createProduct(order.id, 'Invitație clasică', template.id);
+    expect(product.templateId).toBe(template.id);
+  });
+});
+
+// ── createProductFromTemplate ─────────────────────────────────────
+describe('createProductFromTemplate', () => {
+  it('creates product copying name from template', () => {
+    const order = createOrder('From Template');
+    const template = createTemplate('Meniu nuntă', 'Desc');
+    const product = createProductFromTemplate(order.id, template.id);
+    expect(product.name).toBe('Meniu nuntă');
+    expect(product.templateId).toBe(template.id);
+    expect(product.orderId).toBe(order.id);
+    expect(product.status).toBe('de_facut');
+  });
+
+  it('returns null for unknown template id', () => {
+    const order = createOrder('Unknown Template');
+    expect(createProductFromTemplate(order.id, 'nonexistent-id')).toBeNull();
   });
 });
 

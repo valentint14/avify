@@ -59,4 +59,23 @@ function deleteOrder(id) {
   return result.changes > 0;
 }
 
-module.exports = { getAllWithStatus, getOrderById, createOrder, deleteOrder };
+function createOrderWithProducts(name, templateIds = []) {
+  const { createProductFromTemplate } = require('./products.js');
+  const db = getDb();
+  db.exec('BEGIN');
+  try {
+    const order = createOrder(name);
+    const products = [];
+    for (const templateId of templateIds) {
+      const product = createProductFromTemplate(order.id, templateId);
+      if (product) products.push(product);
+    }
+    db.exec('COMMIT');
+    return { order: getOrderById(order.id), products };
+  } catch (err) {
+    db.exec('ROLLBACK');
+    throw err;
+  }
+}
+
+module.exports = { getAllWithStatus, getOrderById, createOrder, createOrderWithProducts, deleteOrder };

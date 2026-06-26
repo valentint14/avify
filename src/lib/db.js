@@ -15,16 +15,25 @@ const SCHEMA = `
 
   CREATE INDEX IF NOT EXISTS idx_orders_created_at ON orders (created_at);
 
+  CREATE TABLE IF NOT EXISTS product_templates (
+    id          TEXT NOT NULL PRIMARY KEY,
+    name        TEXT NOT NULL,
+    description TEXT,
+    created_at  TEXT NOT NULL
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_product_templates_name ON product_templates (name);
+
   CREATE TABLE IF NOT EXISTS products (
-    id         TEXT NOT NULL PRIMARY KEY,
-    order_id   TEXT NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
-    name       TEXT NOT NULL,
-    status     TEXT NOT NULL DEFAULT 'de_facut'
-               CHECK (status IN (
-                 'de_facut', 'in_design', 'validare_client',
-                 'printare', 'asamblare', 'gata'
-               )),
-    created_at TEXT NOT NULL
+    id          TEXT NOT NULL PRIMARY KEY,
+    order_id    TEXT NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+    name        TEXT NOT NULL,
+    status      TEXT NOT NULL DEFAULT 'de_facut'
+                CHECK (status IN (
+                  'de_facut', 'in_design', 'validare_client',
+                  'printare', 'asamblare', 'gata'
+                )),
+    created_at  TEXT NOT NULL
   );
 
   CREATE INDEX IF NOT EXISTS idx_products_order_id ON products (order_id);
@@ -35,6 +44,12 @@ function openDb(filePath) {
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
   const db = new DatabaseSync(filePath);
   db.exec(SCHEMA);
+  const cols = db.prepare('PRAGMA table_info(products)').all();
+  if (!cols.some((c) => c.name === 'template_id')) {
+    db.exec(
+      'ALTER TABLE products ADD COLUMN template_id TEXT REFERENCES product_templates(id) ON DELETE SET NULL'
+    );
+  }
   return db;
 }
 

@@ -1,0 +1,342 @@
+/* ── Catalog page layout ────────────────────────────────────── */
+.catalog-page {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: var(--space-xl) var(--space-lg);
+}
+
+.catalog-header {
+  margin-bottom: var(--space-xl);
+}
+
+.catalog-title {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text);
+  margin-bottom: var(--space-xs);
+}
+
+.catalog-subtitle {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+/* ── Add form ────────────────────────────────────────────────── */
+.catalog-add-section {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  margin-bottom: var(--space-lg);
+}
+
+.catalog-add-title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.catalog-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.catalog-form-row {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.catalog-form-input {
+  flex: 1;
+  min-width: 200px;
+  padding: var(--space-sm) var(--space-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-base);
+  color: var(--color-text);
+  background: var(--color-surface);
+  transition: border-color 0.15s;
+}
+
+.catalog-form-input:focus {
+  outline: none;
+  border-color: #2563eb;
+}
+
+.catalog-form-desc {
+  width: 100%;
+  padding: var(--space-sm) var(--space-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  background: var(--color-surface);
+  transition: border-color 0.15s;
+}
+
+.catalog-form-desc:focus {
+  outline: none;
+  border-color: #2563eb;
+}
+
+.catalog-form-btn {
+  padding: var(--space-sm) var(--space-md);
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+  transition: opacity 0.15s;
+}
+
+.catalog-form-btn:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.catalog-form-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.catalog-form-btn--secondary {
+  background: var(--color-border);
+  color: var(--color-text);
+}
+
+.catalog-form-error {
+  font-size: var(--font-size-sm);
+  color: var(--color-danger);
+}
+
+/* ── Template list ───────────────────────────────────────────── */
+.catalog-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.catalog-empty {
+  text-align: center;
+  padding: var(--space-xl);
+  color: var(--color-text-muted);
+  background: var(--color-surface);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.catalog-empty-title {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  margin-bottom: var(--space-xs);
+}
+
+.catalog-empty-hint {
+  font-size: var(--font-size-sm);
+}
+
+/* ── Template item ───────────────────────────────────────────── */
+.catalog-item {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-sm) var(--space-md);
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  transition: border-color 0.15s;
+}
+
+.catalog-item:hover {
+  border-color: var(--color-border-hover);
+}
+
+.catalog-item-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.catalog-item-name {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
+}
+
+.catalog-item-desc {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.catalog-item-actions {
+  display: flex;
+  gap: var(--space-xs);
+  flex-shrink: 0;
+}
+
+.catalog-item-btn {
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.catalog-item-btn:hover {
+  border-color: var(--color-border-hover);
+  background: var(--color-bg);
+}
+
+.catalog-item-btn--danger {
+  color: var(--color-danger);
+  border-color: var(--color-danger);
+}
+
+.catalog-item-btn--danger:hover {
+  background: #fee2e2;
+}
+
+/* ── Inline delete confirm ───────────────────────────────────── */
+.catalog-delete-confirm {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: var(--font-size-sm);
+  color: var(--color-danger);
+}
+
+.catalog-delete-confirm-text {
+  white-space: nowrap;
+}
+
+/* ── Inline edit form inside item ────────────────────────────── */
+.catalog-item--editing {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+/* ── Catalog selector (used in AddOrderForm / AddProductForm) ── */
+.catalog-selector {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.catalog-selector-input {
+  width: 100%;
+  padding: var(--space-sm) var(--space-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-base);
+  color: var(--color-text);
+  background: var(--color-surface);
+  transition: border-color 0.15s;
+}
+
+.catalog-selector-input:focus {
+  outline: none;
+  border-color: #2563eb;
+}
+
+.catalog-selector-dropdown {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  max-height: 180px;
+  overflow-y: auto;
+  box-shadow: var(--shadow-card);
+}
+
+.catalog-selector-option {
+  padding: var(--space-sm) var(--space-md);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  transition: background 0.1s;
+}
+
+.catalog-selector-option:hover {
+  background: var(--color-bg);
+}
+
+.catalog-selector-empty {
+  padding: var(--space-sm) var(--space-md);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.catalog-selector-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+.catalog-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: 2px var(--space-sm);
+  background: #dbeafe;
+  color: #1e40af;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+.catalog-chip-remove {
+  background: none;
+  border: none;
+  color: #1e40af;
+  font-size: 1rem;
+  line-height: 1;
+  padding: 0 2px;
+  opacity: 0.7;
+  transition: opacity 0.1s;
+}
+
+.catalog-chip-remove:hover {
+  opacity: 1;
+}
+
+.catalog-selector-hint {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+/* ── Mode toggle (manual / catalog) ─────────────────────────── */
+.mode-toggle {
+  display: flex;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-sm);
+}
+
+.mode-toggle-btn {
+  padding: var(--space-sm) var(--space-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-muted);
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+  white-space: nowrap;
+}
+
+.mode-toggle-btn--active {
+  border-color: #2563eb;
+  color: #2563eb;
+  background: #eff6ff;
+  font-weight: var(--font-weight-medium);
+}

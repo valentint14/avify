@@ -1,4 +1,4 @@
-import { getProductsByOrder, createProduct } from '../../../lib/products.js';
+import { getProductsByOrder, createProduct, createProductFromTemplate } from '../../../lib/products.js';
 import { getAllWithStatus } from '../../../lib/orders.js';
 
 export async function GET(request) {
@@ -33,7 +33,10 @@ export async function POST(request) {
       return Response.json({ error: 'Comanda nu a fost găsită.' }, { status: 404 });
     }
 
-    const product = createProduct(orderId, name);
+    const templateId = typeof body.templateId === 'string' ? body.templateId : null;
+    const product = templateId
+      ? createProductFromTemplate(orderId, templateId) ?? createProduct(orderId, name, null)
+      : createProduct(orderId, name, null);
     return Response.json({ product }, { status: 201 });
   } catch {
     return Response.json({ error: 'Eroare internă de server.' }, { status: 500 });
