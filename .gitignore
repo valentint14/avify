@@ -1,0 +1,28 @@
+# dependencies
+node_modules/
+
+# Next.js
+.next/
+out/
+
+# build
+build/
+dist/
+
+# database (local SQLite file — never commit)
+data/avify.db
+
+# environment
+.env
+.env*.local
+
+# testing
+coverage/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# logs
+*.log
+npm-debug.log*
