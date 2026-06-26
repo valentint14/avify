@@ -1,8 +1,7 @@
-import { getAll, getAllProductTypes } from '../lib/orders.js';
-import Board from '../components/Board.js';
+import { getAllWithStatus } from '../lib/orders.js';
+import OrderList from '../components/OrderList.js';
 
 export default function Page() {
-  const initialOrders = getAll();
-  const initialProductTypes = getAllProductTypes();
-  return <Board initialOrders={initialOrders} initialProductTypes={initialProductTypes} />;
+  const initialOrders = getAllWithStatus();
+  return <OrderList initialOrders={initialOrders} />;
 }

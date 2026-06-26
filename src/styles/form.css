@@ -1,3 +1,56 @@
+/* ── Inline add forms ────────────────────────────────────────── */
+.add-form {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-sm);
+}
+
+.add-form-input {
+  flex: 1;
+  min-width: 200px;
+  padding: var(--space-sm) var(--space-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-base);
+  color: var(--color-text);
+  background: var(--color-surface);
+  transition: border-color 0.15s;
+}
+
+.add-form-input:focus {
+  outline: none;
+  border-color: #2563eb;
+}
+
+.add-form-btn {
+  padding: var(--space-sm) var(--space-md);
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  transition: opacity 0.15s;
+  white-space: nowrap;
+}
+
+.add-form-btn:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.add-form-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.add-form-error {
+  width: 100%;
+  font-size: var(--font-size-sm);
+  color: var(--color-danger);
+}
+
 /* ── Modal overlay ───────────────────────────────────────────── */
 .modal-overlay {
   position: fixed;

@@ -1,21 +1,12 @@
 'use strict';
 
-// Mock db.js so all orders.js functions use an in-memory SQLite database.
 jest.mock('../../../src/lib/db.js', () => {
   const { openDb } = jest.requireActual('../../../src/lib/db.js');
   const testDb = openDb(':memory:');
   return { getDb: () => testDb, openDb };
 });
 
-const {
-  getAll,
-  getById,
-  create,
-  update,
-  deleteOrder,
-  getAllProductTypes,
-  createProductType,
-} = require('../../../src/lib/orders.js');
+const { getAllWithStatus, createOrder, deleteOrder } = require('../../../src/lib/orders.js');
 
 let db;
 beforeAll(() => {
@@ -23,177 +14,105 @@ beforeAll(() => {
 });
 
 beforeEach(() => {
+  db.exec('DELETE FROM products');
   db.exec('DELETE FROM orders');
-  db.exec("DELETE FROM product_types WHERE is_custom = 1");
 });
 
-// ── getAll ──────────────────────────────────────────────────────
-describe('getAll', () => {
+// ── getAllWithStatus ─────────────────────────────────────────────
+describe('getAllWithStatus', () => {
   it('returns empty array when no orders exist', () => {
-    expect(getAll()).toEqual([]);
+    expect(getAllWithStatus()).toEqual([]);
   });
 
-  it('returns all orders sorted by eventDate ASC then createdAt ASC', () => {
-    create({ primaryName: 'B', eventDate: '2026-09-01', eventType: 'nunta', productTypes: ['Invitații'], paymentStatus: 'neachitat' });
-    create({ primaryName: 'A', eventDate: '2026-08-01', eventType: 'nunta', productTypes: ['Meniu'], paymentStatus: 'achitat_integral' });
-    const orders = getAll();
-    expect(orders[0].primaryName).toBe('A');
-    expect(orders[1].primaryName).toBe('B');
+  it('returns in_progres for order with no products', () => {
+    createOrder('Nuntă Test');
+    const [order] = getAllWithStatus();
+    expect(order.status).toBe('in_progres');
+    expect(order.productCount).toBe(0);
+    expect(order.doneCount).toBe(0);
   });
 
-  it('filters by payment_status', () => {
-    create({ primaryName: 'X', eventDate: '2026-08-01', eventType: 'nunta', productTypes: ['Invitații'], paymentStatus: 'neachitat' });
-    create({ primaryName: 'Y', eventDate: '2026-08-02', eventType: 'nunta', productTypes: ['Meniu'], paymentStatus: 'achitat_integral' });
-    const orders = getAll({ payment_status: 'neachitat' });
-    expect(orders).toHaveLength(1);
-    expect(orders[0].primaryName).toBe('X');
+  it('returns in_progres for order with mixed-status products', () => {
+    const order = createOrder('Botez Test');
+    db.prepare("INSERT INTO products (id, order_id, name, status, created_at) VALUES (?, ?, ?, ?, ?)").run(
+      'p1', order.id, 'Invitații', 'gata', new Date().toISOString()
+    );
+    db.prepare("INSERT INTO products (id, order_id, name, status, created_at) VALUES (?, ?, ?, ?, ?)").run(
+      'p2', order.id, 'Meniu', 'printare', new Date().toISOString()
+    );
+    const [found] = getAllWithStatus();
+    expect(found.status).toBe('in_progres');
+    expect(found.productCount).toBe(2);
+    expect(found.doneCount).toBe(1);
   });
 
-  it('filters by event_date_from', () => {
-    create({ primaryName: 'Early', eventDate: '2026-07-01', eventType: 'botez', productTypes: ['Plic'], paymentStatus: 'neachitat' });
-    create({ primaryName: 'Late', eventDate: '2026-09-01', eventType: 'botez', productTypes: ['Plic'], paymentStatus: 'neachitat' });
-    const orders = getAll({ event_date_from: '2026-08-01' });
-    expect(orders).toHaveLength(1);
-    expect(orders[0].primaryName).toBe('Late');
+  it('returns finalizata when all products are in gata', () => {
+    const order = createOrder('Gata Test');
+    db.prepare("INSERT INTO products (id, order_id, name, status, created_at) VALUES (?, ?, ?, ?, ?)").run(
+      'p3', order.id, 'Invitații', 'gata', new Date().toISOString()
+    );
+    db.prepare("INSERT INTO products (id, order_id, name, status, created_at) VALUES (?, ?, ?, ?, ?)").run(
+      'p4', order.id, 'Meniu', 'gata', new Date().toISOString()
+    );
+    const [found] = getAllWithStatus();
+    expect(found.status).toBe('finalizata');
+    expect(found.productCount).toBe(2);
+    expect(found.doneCount).toBe(2);
   });
 
-  it('filters by event_date_to', () => {
-    create({ primaryName: 'Early', eventDate: '2026-07-01', eventType: 'botez', productTypes: ['Plic'], paymentStatus: 'neachitat' });
-    create({ primaryName: 'Late', eventDate: '2026-09-01', eventType: 'botez', productTypes: ['Plic'], paymentStatus: 'neachitat' });
-    const orders = getAll({ event_date_to: '2026-07-31' });
-    expect(orders).toHaveLength(1);
-    expect(orders[0].primaryName).toBe('Early');
+  it('returns orders ordered by created_at DESC', () => {
+    const now = Date.now();
+    db.prepare("INSERT INTO orders (id, name, created_at) VALUES (?, ?, ?)").run('o-old', 'Old', new Date(now - 2000).toISOString());
+    db.prepare("INSERT INTO orders (id, name, created_at) VALUES (?, ?, ?)").run('o-new', 'New', new Date(now).toISOString());
+    const orders = getAllWithStatus();
+    expect(orders[0].id).toBe('o-new');
+    expect(orders[1].id).toBe('o-old');
+  });
+
+  it('response shape has all required fields', () => {
+    createOrder('Shape Test');
+    const [order] = getAllWithStatus();
+    expect(order).toHaveProperty('id');
+    expect(order).toHaveProperty('name');
+    expect(order).toHaveProperty('status');
+    expect(order).toHaveProperty('productCount');
+    expect(order).toHaveProperty('doneCount');
+    expect(order).toHaveProperty('createdAt');
   });
 });
 
-// ── create ──────────────────────────────────────────────────────
-describe('create', () => {
-  it('inserts an order and returns camelCase entity', () => {
-    const order = create({
-      primaryName: 'Andrei Popescu',
-      secondaryName: 'Maria Popescu',
-      eventDate: '2026-08-15',
-      eventType: 'nunta',
-      productTypes: ['Invitații', 'Meniu'],
-      paymentStatus: 'neachitat',
-      notes: 'test',
-    });
+// ── createOrder ─────────────────────────────────────────────────
+describe('createOrder', () => {
+  it('creates an order and returns it with derived fields', () => {
+    const order = createOrder('Nuntă Ionescu');
     expect(order.id).toMatch(/^[0-9a-f-]{36}$/);
-    expect(order.primaryName).toBe('Andrei Popescu');
-    expect(order.secondaryName).toBe('Maria Popescu');
-    expect(order.eventDate).toBe('2026-08-15');
-    expect(order.eventType).toBe('nunta');
-    expect(order.productTypes).toEqual(['Invitații', 'Meniu']);
-    expect(order.paymentStatus).toBe('neachitat');
-    expect(order.stage).toBe('de_facut');
-    expect(order.notes).toBe('test');
+    expect(order.name).toBe('Nuntă Ionescu');
+    expect(order.status).toBe('in_progres');
+    expect(order.productCount).toBe(0);
+    expect(order.doneCount).toBe(0);
     expect(order.createdAt).toBeTruthy();
-    expect(order.updatedAt).toBeTruthy();
-  });
-
-  it('defaults stage to de_facut', () => {
-    const order = create({ primaryName: 'X', eventDate: '2026-01-01', eventType: 'botez', productTypes: ['Plic'], paymentStatus: 'neachitat' });
-    expect(order.stage).toBe('de_facut');
-  });
-
-  it('allows setting a custom stage', () => {
-    const order = create({ primaryName: 'X', eventDate: '2026-01-01', eventType: 'botez', productTypes: ['Plic'], paymentStatus: 'neachitat', stage: 'printare' });
-    expect(order.stage).toBe('printare');
-  });
-
-  it('sets secondaryName and notes to null when omitted', () => {
-    const order = create({ primaryName: 'X', eventDate: '2026-01-01', eventType: 'nunta', productTypes: ['Meniu'], paymentStatus: 'achitat_integral' });
-    expect(order.secondaryName).toBeNull();
-    expect(order.notes).toBeNull();
-  });
-});
-
-// ── getById ─────────────────────────────────────────────────────
-describe('getById', () => {
-  it('returns the order by id', () => {
-    const created = create({ primaryName: 'Z', eventDate: '2026-05-01', eventType: 'nunta', productTypes: ['Program'], paymentStatus: 'avans_achitat' });
-    const found = getById(created.id);
-    expect(found).not.toBeNull();
-    expect(found.id).toBe(created.id);
-    expect(found.primaryName).toBe('Z');
-  });
-
-  it('returns null for unknown id', () => {
-    expect(getById('nonexistent-id')).toBeNull();
-  });
-});
-
-// ── update ──────────────────────────────────────────────────────
-describe('update', () => {
-  it('applies a partial patch', () => {
-    const order = create({ primaryName: 'A', eventDate: '2026-01-01', eventType: 'nunta', productTypes: ['Meniu'], paymentStatus: 'neachitat' });
-    const updated = update(order.id, { paymentStatus: 'achitat_integral' });
-    expect(updated.paymentStatus).toBe('achitat_integral');
-    expect(updated.primaryName).toBe('A');
-  });
-
-  it('updates stage for drag-and-drop move', () => {
-    const order = create({ primaryName: 'A', eventDate: '2026-01-01', eventType: 'nunta', productTypes: ['Meniu'], paymentStatus: 'neachitat' });
-    const moved = update(order.id, { stage: 'printare' });
-    expect(moved.stage).toBe('printare');
-  });
-
-  it('sets updatedAt to a newer timestamp', (done) => {
-    const order = create({ primaryName: 'A', eventDate: '2026-01-01', eventType: 'nunta', productTypes: ['Meniu'], paymentStatus: 'neachitat' });
-    setTimeout(() => {
-      const updated = update(order.id, { paymentStatus: 'avans_achitat' });
-      expect(updated.updatedAt >= order.updatedAt).toBe(true);
-      done();
-    }, 5);
-  });
-
-  it('returns null for unknown id', () => {
-    expect(update('nonexistent-id', { paymentStatus: 'neachitat' })).toBeNull();
-  });
-
-  it('returns current order unchanged when patch is empty', () => {
-    const order = create({ primaryName: 'A', eventDate: '2026-01-01', eventType: 'nunta', productTypes: ['Meniu'], paymentStatus: 'neachitat' });
-    const unchanged = update(order.id, {});
-    expect(unchanged.primaryName).toBe('A');
   });
 });
 
 // ── deleteOrder ─────────────────────────────────────────────────
 describe('deleteOrder', () => {
   it('removes the order and returns true', () => {
-    const order = create({ primaryName: 'Del', eventDate: '2026-01-01', eventType: 'nunta', productTypes: ['Meniu'], paymentStatus: 'neachitat' });
+    const order = createOrder('Del Test');
     expect(deleteOrder(order.id)).toBe(true);
-    expect(getById(order.id)).toBeNull();
+    expect(getAllWithStatus()).toHaveLength(0);
   });
 
   it('returns false for unknown id', () => {
     expect(deleteOrder('nonexistent-id')).toBe(false);
   });
-});
 
-// ── product types ────────────────────────────────────────────────
-describe('getAllProductTypes', () => {
-  it('returns 7 seeded system product types', () => {
-    const types = getAllProductTypes();
-    expect(types.length).toBeGreaterThanOrEqual(7);
-    const names = types.map((t) => t.name);
-    expect(names).toContain('Invitații');
-    expect(names).toContain('Altele');
-  });
-
-  it('includes isCustom: false for system types', () => {
-    const types = getAllProductTypes();
-    types.filter((t) => !t.isCustom).forEach((t) => {
-      expect(t.isCustom).toBe(false);
-    });
-  });
-});
-
-describe('createProductType', () => {
-  it('creates a custom product type', () => {
-    const pt = createProductType('Felicitări');
-    expect(pt.id).toBeTruthy();
-    expect(pt.name).toBe('Felicitări');
-    expect(pt.isCustom).toBe(true);
+  it('cascades to delete associated products', () => {
+    const order = createOrder('Cascade Test');
+    db.prepare("INSERT INTO products (id, order_id, name, status, created_at) VALUES (?, ?, ?, ?, ?)").run(
+      'pc1', order.id, 'Invitații', 'de_facut', new Date().toISOString()
+    );
+    deleteOrder(order.id);
+    const products = db.prepare('SELECT * FROM products WHERE order_id = ?').all(order.id);
+    expect(products).toHaveLength(0);
   });
 });

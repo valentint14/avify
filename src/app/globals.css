@@ -1,9 +1,10 @@
 /* ── Design Tokens ──────────────────────────────────────────── */
 :root {
-  /* Payment status colors */
-  --color-neachitat: #dc2626;
-  --color-avans-achitat: #d97706;
-  --color-achitat-integral: #16a34a;
+  /* Status colors */
+  --color-finalizata: #166534;
+  --color-finalizata-bg: #dcfce7;
+  --color-in-progres: #1e40af;
+  --color-in-progres-bg: #dbeafe;
   --color-danger: #dc2626;
   --color-warn: #d97706;
   --color-ok: #16a34a;

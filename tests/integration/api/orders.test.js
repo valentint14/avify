@@ -1,6 +1,5 @@
 'use strict';
 
-// All API routes will use this in-memory database.
 jest.mock('../../../src/lib/db.js', () => {
   const { openDb } = jest.requireActual('../../../src/lib/db.js');
   const testDb = openDb(':memory:');
@@ -13,22 +12,13 @@ beforeAll(() => {
 });
 
 beforeEach(() => {
+  db.exec('DELETE FROM products');
   db.exec('DELETE FROM orders');
 });
 
-// Helper: build a minimal valid order payload
-const validPayload = (overrides = {}) => ({
-  primaryName: 'Test Client',
-  eventDate: '2026-09-01',
-  eventType: 'nunta',
-  productTypes: ['Invitații'],
-  paymentStatus: 'neachitat',
-  ...overrides,
-});
-
-async function callGet(url) {
+async function callGet() {
   const { GET } = require('../../../src/app/api/orders/route.js');
-  return GET(new Request(`http://localhost${url}`));
+  return GET(new Request('http://localhost/api/orders'));
 }
 
 async function callPost(body) {
@@ -40,20 +30,6 @@ async function callPost(body) {
   }));
 }
 
-async function callGetById(id) {
-  const { GET } = require('../../../src/app/api/orders/[id]/route.js');
-  return GET(new Request(`http://localhost/api/orders/${id}`), { params: { id } });
-}
-
-async function callPut(id, body) {
-  const { PUT } = require('../../../src/app/api/orders/[id]/route.js');
-  return PUT(new Request(`http://localhost/api/orders/${id}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  }), { params: { id } });
-}
-
 async function callDelete(id) {
   const { DELETE } = require('../../../src/app/api/orders/[id]/route.js');
   return DELETE(new Request(`http://localhost/api/orders/${id}`, { method: 'DELETE' }), { params: { id } });
@@ -62,117 +38,78 @@ async function callDelete(id) {
 // ── GET /api/orders ─────────────────────────────────────────────
 describe('GET /api/orders', () => {
   it('returns 200 with empty orders array', async () => {
-    const res = await callGet('/api/orders');
+    const res = await callGet();
     expect(res.status).toBe(200);
     const { orders } = await res.json();
     expect(orders).toEqual([]);
   });
 
-  it('returns all created orders', async () => {
-    await callPost(validPayload({ primaryName: 'First' }));
-    await callPost(validPayload({ primaryName: 'Second' }));
-    const res = await callGet('/api/orders');
+  it('returns orders with derived status fields', async () => {
+    await callPost({ name: 'Test Order' });
+    const res = await callGet();
+    expect(res.status).toBe(200);
     const { orders } = await res.json();
-    expect(orders).toHaveLength(2);
+    expect(orders).toHaveLength(1);
+    const [order] = orders;
+    expect(order).toHaveProperty('id');
+    expect(order).toHaveProperty('name', 'Test Order');
+    expect(order).toHaveProperty('status', 'in_progres');
+    expect(order).toHaveProperty('productCount', 0);
+    expect(order).toHaveProperty('doneCount', 0);
+    expect(order).toHaveProperty('createdAt');
+  });
+
+  it('returns finalizata status when all products are gata', async () => {
+    const createRes = await callPost({ name: 'Done Order' });
+    const { order } = await createRes.json();
+    db.prepare("INSERT INTO products (id, order_id, name, status, created_at) VALUES (?, ?, ?, ?, ?)").run(
+      'p1', order.id, 'Invitații', 'gata', new Date().toISOString()
+    );
+    const getRes = await callGet();
+    const { orders } = await getRes.json();
+    expect(orders[0].status).toBe('finalizata');
+    expect(orders[0].doneCount).toBe(1);
   });
 });
 
 // ── POST /api/orders ────────────────────────────────────────────
 describe('POST /api/orders', () => {
   it('creates an order and returns 201', async () => {
-    const res = await callPost(validPayload());
+    const res = await callPost({ name: 'Nuntă Popescu' });
     expect(res.status).toBe(201);
     const { order } = await res.json();
     expect(order.id).toBeTruthy();
-    expect(order.primaryName).toBe('Test Client');
-    expect(order.stage).toBe('de_facut');
+    expect(order.name).toBe('Nuntă Popescu');
+    expect(order.status).toBe('in_progres');
+    expect(order.productCount).toBe(0);
   });
 
-  it('returns 400 when primaryName is missing', async () => {
-    const res = await callPost(validPayload({ primaryName: '' }));
+  it('returns 400 when name is missing', async () => {
+    const res = await callPost({});
     expect(res.status).toBe(400);
     const { error } = await res.json();
     expect(error).toBeTruthy();
   });
 
-  it('returns 400 when eventDate is missing', async () => {
-    const res = await callPost(validPayload({ eventDate: '' }));
+  it('returns 400 when name is empty string', async () => {
+    const res = await callPost({ name: '   ' });
     expect(res.status).toBe(400);
   });
 
-  it('returns 400 for unknown eventType', async () => {
-    const res = await callPost(validPayload({ eventType: 'craciun' }));
-    expect(res.status).toBe(400);
-  });
-
-  it('returns 400 when productTypes is empty', async () => {
-    const res = await callPost(validPayload({ productTypes: [] }));
-    expect(res.status).toBe(400);
-  });
-
-  it('returns 400 for invalid paymentStatus', async () => {
-    const res = await callPost(validPayload({ paymentStatus: 'partial' }));
-    expect(res.status).toBe(400);
-  });
-});
-
-// ── GET /api/orders/:id ─────────────────────────────────────────
-describe('GET /api/orders/:id', () => {
-  it('returns 200 with the order', async () => {
-    const createRes = await callPost(validPayload());
-    const { order: created } = await createRes.json();
-    const res = await callGetById(created.id);
-    expect(res.status).toBe(200);
-    const { order } = await res.json();
-    expect(order.id).toBe(created.id);
-  });
-
-  it('returns 404 for unknown id', async () => {
-    const res = await callGetById('nonexistent');
-    expect(res.status).toBe(404);
-  });
-});
-
-// ── PUT /api/orders/:id ─────────────────────────────────────────
-describe('PUT /api/orders/:id', () => {
-  it('partially updates and returns 200', async () => {
-    const { order: created } = await (await callPost(validPayload())).json();
-    const res = await callPut(created.id, { paymentStatus: 'achitat_integral' });
-    expect(res.status).toBe(200);
-    const { order } = await res.json();
-    expect(order.paymentStatus).toBe('achitat_integral');
-    expect(order.primaryName).toBe('Test Client');
-  });
-
-  it('updates stage (drag-and-drop)', async () => {
-    const { order: created } = await (await callPost(validPayload())).json();
-    const res = await callPut(created.id, { stage: 'printare' });
-    const { order } = await res.json();
-    expect(order.stage).toBe('printare');
-  });
-
-  it('returns 404 for unknown id', async () => {
-    const res = await callPut('nonexistent', { paymentStatus: 'neachitat' });
-    expect(res.status).toBe(404);
-  });
-
-  it('returns 400 for invalid stage', async () => {
-    const { order: created } = await (await callPost(validPayload())).json();
-    const res = await callPut(created.id, { stage: 'invalid-stage' });
+  it('returns 400 when name is not a string', async () => {
+    const res = await callPost({ name: 123 });
     expect(res.status).toBe(400);
   });
 });
 
 // ── DELETE /api/orders/:id ──────────────────────────────────────
 describe('DELETE /api/orders/:id', () => {
-  it('deletes the order and returns 200', async () => {
-    const { order: created } = await (await callPost(validPayload())).json();
-    const res = await callDelete(created.id);
+  it('deletes the order and returns 200 with {deleted:true}', async () => {
+    const { order } = await (await callPost({ name: 'To Delete' })).json();
+    const res = await callDelete(order.id);
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body.success).toBe(true);
-    const getRes = await callGetById(created.id);
-    expect(getRes.status).toBe(404);
+    expect(body.deleted).toBe(true);
   });
 
   it('returns 404 for unknown id', async () => {
