@@ -27,6 +27,12 @@ export async function POST(request) {
       return Response.json({ error: 'Numele produsului este obligatoriu.' }, { status: 400 });
     }
 
+    const quantity = body.quantity !== undefined ? Math.trunc(Number(body.quantity)) : 1;
+    if (!Number.isFinite(quantity) || quantity < 1) {
+      return Response.json({ error: 'Cantitatea trebuie să fie un număr întreg pozitiv.' }, { status: 400 });
+    }
+    const additionalInfo = typeof body.additionalInfo === 'string' ? body.additionalInfo : null;
+
     // Verify order exists
     const orders = getAllWithStatus();
     if (!orders.find((o) => o.id === orderId)) {
@@ -35,10 +41,13 @@ export async function POST(request) {
 
     const templateId = typeof body.templateId === 'string' ? body.templateId : null;
     const product = templateId
-      ? createProductFromTemplate(orderId, templateId) ?? createProduct(orderId, name, null)
-      : createProduct(orderId, name, null);
+      ? createProductFromTemplate(orderId, templateId, quantity, additionalInfo) ?? createProduct(orderId, name, null, quantity, additionalInfo)
+      : createProduct(orderId, name, null, quantity, additionalInfo);
     return Response.json({ product }, { status: 201 });
-  } catch {
+  } catch (err) {
+    if (err?.message?.includes('UNIQUE constraint failed')) {
+      return Response.json({ error: 'Produsul există deja în această comandă.' }, { status: 409 });
+    }
     return Response.json({ error: 'Eroare internă de server.' }, { status: 500 });
   }
 }

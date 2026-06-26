@@ -10,6 +10,8 @@ function parseRow(row) {
     name: row.name,
     status: row.status,
     templateId: row.template_id ?? null,
+    quantity: Number(row.quantity ?? 1),
+    additionalInfo: row.additional_info ?? null,
     createdAt: row.created_at,
   };
 }
@@ -21,21 +23,41 @@ function getProductsByOrder(orderId) {
   return rows.map(parseRow);
 }
 
-function createProduct(orderId, name, templateId = null) {
+function createProduct(orderId, name, templateId = null, quantity = 1, additionalInfo = null) {
   const db = getDb();
   const now = new Date().toISOString();
   const id = crypto.randomUUID();
   db.prepare(
-    'INSERT INTO products (id, order_id, name, status, template_id, created_at) VALUES (?, ?, ?, ?, ?, ?)'
-  ).run(id, orderId, name, 'de_facut', templateId, now);
+    'INSERT INTO products (id, order_id, name, status, template_id, quantity, additional_info, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
+  ).run(id, orderId, name, 'de_facut', templateId, quantity, additionalInfo, now);
   return parseRow(db.prepare('SELECT * FROM products WHERE id = ?').get(id));
 }
 
-function createProductFromTemplate(orderId, templateId) {
+function createProductFromTemplate(orderId, templateId, quantity = 1, additionalInfo = null) {
   const { getById } = require('./productTemplates.js');
   const template = getById(templateId);
   if (!template) return null;
-  return createProduct(orderId, template.name, templateId);
+  return createProduct(orderId, template.name, templateId, quantity, additionalInfo);
+}
+
+function updateProduct(productId, fields) {
+  const db = getDb();
+  const allowed = ['quantity', 'additional_info'];
+  const setClauses = [];
+  const values = [];
+  if (fields.quantity !== undefined) {
+    setClauses.push('quantity = ?');
+    values.push(fields.quantity);
+  }
+  if (fields.additionalInfo !== undefined) {
+    setClauses.push('additional_info = ?');
+    values.push(fields.additionalInfo);
+  }
+  if (setClauses.length === 0) return null;
+  values.push(productId);
+  const result = db.prepare(`UPDATE products SET ${setClauses.join(', ')} WHERE id = ?`).run(...values);
+  if (result.changes === 0) return null;
+  return parseRow(db.prepare('SELECT * FROM products WHERE id = ?').get(productId));
 }
 
 function updateProductStatus(productId, status) {
@@ -51,4 +73,4 @@ function deleteProduct(productId) {
   return result.changes > 0;
 }
 
-module.exports = { getProductsByOrder, createProduct, createProductFromTemplate, updateProductStatus, deleteProduct, VALID_STAGES };
+module.exports = { getProductsByOrder, createProduct, createProductFromTemplate, updateProductStatus, updateProduct, deleteProduct, VALID_STAGES };

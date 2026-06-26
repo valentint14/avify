@@ -1,17 +1,42 @@
-import { updateProductStatus, deleteProduct } from '../../../../lib/products.js';
+import { updateProductStatus, updateProduct, deleteProduct } from '../../../../lib/products.js';
 import { VALID_STAGES } from '../../../../lib/constants.js';
 
 export async function PATCH(request, { params }) {
   try {
     const body = await request.json();
-    const status = typeof body.status === 'string' ? body.status.trim() : '';
+    const hasStatus = typeof body.status === 'string' && body.status.trim() !== '';
+    const hasQuantity = body.quantity !== undefined;
+    const hasAdditionalInfo = body.additionalInfo !== undefined;
 
-    if (!VALID_STAGES.includes(status)) {
-      return Response.json({ error: 'Status invalid.' }, { status: 400 });
+    if (!hasStatus && !hasQuantity && !hasAdditionalInfo) {
+      return Response.json({ error: 'Cel puțin un câmp trebuie furnizat.' }, { status: 400 });
     }
 
-    const product = updateProductStatus(params.id, status);
-    if (!product) return Response.json({ error: 'Produsul nu a fost găsit.' }, { status: 404 });
+    let product = null;
+
+    if (hasStatus) {
+      const status = body.status.trim();
+      if (!VALID_STAGES.includes(status)) {
+        return Response.json({ error: 'Status invalid.' }, { status: 400 });
+      }
+      product = updateProductStatus(params.id, status);
+      if (!product) return Response.json({ error: 'Produsul nu a fost găsit.' }, { status: 404 });
+    }
+
+    if (hasQuantity || hasAdditionalInfo) {
+      if (hasQuantity) {
+        const quantity = Math.trunc(Number(body.quantity));
+        if (!Number.isFinite(quantity) || quantity < 1) {
+          return Response.json({ error: 'Cantitatea trebuie să fie un număr întreg pozitiv.' }, { status: 400 });
+        }
+      }
+      const fields = {};
+      if (hasQuantity) fields.quantity = Math.trunc(Number(body.quantity));
+      if (hasAdditionalInfo) fields.additionalInfo = body.additionalInfo;
+      product = updateProduct(params.id, fields);
+      if (!product) return Response.json({ error: 'Produsul nu a fost găsit.' }, { status: 404 });
+    }
+
     return Response.json({ product });
   } catch {
     return Response.json({ error: 'Eroare internă de server.' }, { status: 500 });

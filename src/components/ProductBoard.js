@@ -6,14 +6,14 @@ import ProductColumn from './ProductColumn.js';
 import AddProductForm from './AddProductForm.js';
 import '../styles/product-board.css';
 
-export default function ProductBoard({ orderId, onProductChange }) {
+export default function ProductBoard({ orderId, onProductChange, refreshKey }) {
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
     fetch(`/api/products?orderId=${orderId}`)
       .then((r) => r.json())
       .then(({ products: loaded }) => setProducts(loaded || []));
-  }, [orderId]);
+  }, [orderId, refreshKey]);
 
   async function handleDrop(productId, _fromStage, toStageId) {
     const res = await fetch(`/api/products/${productId}`, {
@@ -54,7 +54,11 @@ export default function ProductBoard({ orderId, onProductChange }) {
           />
         ))}
       </div>
-      <AddProductForm orderId={orderId} onProductAdded={handleProductAdded} />
+      <AddProductForm
+        orderId={orderId}
+        onProductAdded={handleProductAdded}
+        excludedTemplateIds={products.filter((p) => p.templateId).map((p) => p.templateId)}
+      />
     </div>
   );
 }

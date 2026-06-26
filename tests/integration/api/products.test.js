@@ -15,6 +15,7 @@ beforeAll(() => {
 
 beforeEach(() => {
   db.exec('DELETE FROM products');
+  db.exec('DELETE FROM product_templates');
   db.exec('DELETE FROM orders');
   // Seed a test order
   const now = new Date().toISOString();
@@ -104,6 +105,36 @@ describe('POST /api/products', () => {
     const res = await callPostProduct({ orderId: 'nonexistent', name: 'Invitații' });
     expect(res.status).toBe(404);
   });
+
+  it('creates product with custom quantity and additionalInfo', async () => {
+    const res = await callPostProduct({ orderId, name: 'Tricou', quantity: 3, additionalInfo: 'Font Arial' });
+    expect(res.status).toBe(201);
+    const { product } = await res.json();
+    expect(product.quantity).toBe(3);
+    expect(product.additionalInfo).toBe('Font Arial');
+  });
+
+  it('returns 400 when quantity is 0', async () => {
+    const res = await callPostProduct({ orderId, name: 'Tricou', quantity: 0 });
+    expect(res.status).toBe(400);
+    const { error } = await res.json();
+    expect(error).toMatch(/cantitatea/i);
+  });
+
+  it('returns 400 when quantity is negative', async () => {
+    const res = await callPostProduct({ orderId, name: 'Tricou', quantity: -1 });
+    expect(res.status).toBe(400);
+  });
+
+  it('returns 409 when same templateId is added to same order twice', async () => {
+    const templateId = crypto.randomUUID();
+    db.prepare('INSERT INTO product_templates (id, name, created_at) VALUES (?, ?, ?)').run(templateId, 'Tricou', new Date().toISOString());
+    await callPostProduct({ orderId, name: 'Tricou', templateId });
+    const res = await callPostProduct({ orderId, name: 'Tricou', templateId });
+    expect(res.status).toBe(409);
+    const { error } = await res.json();
+    expect(error).toMatch(/există deja/i);
+  });
 });
 
 // ── PATCH /api/products/:id ──────────────────────────────────────
@@ -137,6 +168,43 @@ describe('PATCH /api/products/:id', () => {
       const res = await callPatch(created.id, { status });
       expect(res.status).toBe(200);
     }
+  });
+
+  it('updates quantity and returns updated product', async () => {
+    const { product: created } = await (await callPostProduct({ orderId, name: 'Qty Product' })).json();
+    const res = await callPatch(created.id, { quantity: 5 });
+    expect(res.status).toBe(200);
+    const { product } = await res.json();
+    expect(product.quantity).toBe(5);
+  });
+
+  it('clears additionalInfo when set to null', async () => {
+    const { product: created } = await (await callPostProduct({ orderId, name: 'Info Product', additionalInfo: 'test' })).json();
+    const res = await callPatch(created.id, { additionalInfo: null });
+    expect(res.status).toBe(200);
+    const { product } = await res.json();
+    expect(product.additionalInfo).toBeNull();
+  });
+
+  it('returns 400 when quantity is 0', async () => {
+    const { product: created } = await (await callPostProduct({ orderId, name: 'Bad Qty' })).json();
+    const res = await callPatch(created.id, { quantity: 0 });
+    expect(res.status).toBe(400);
+  });
+
+  it('returns 400 when body is empty', async () => {
+    const { product: created } = await (await callPostProduct({ orderId, name: 'Empty Body' })).json();
+    const res = await callPatch(created.id, {});
+    expect(res.status).toBe(400);
+  });
+
+  it('updates both status and quantity in one request', async () => {
+    const { product: created } = await (await callPostProduct({ orderId, name: 'Both Fields' })).json();
+    const res = await callPatch(created.id, { status: 'printare', quantity: 2 });
+    expect(res.status).toBe(200);
+    const { product } = await res.json();
+    expect(product.status).toBe('printare');
+    expect(product.quantity).toBe(2);
   });
 });
 

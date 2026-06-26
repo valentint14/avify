@@ -43,6 +43,21 @@
   transition: background 0.15s;
 }
 
+.order-row-identity {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-sm);
+  flex: 1;
+  min-width: 0;
+}
+
+.order-row-actions {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-md);
+  flex-shrink: 0;
+}
+
 .order-row:hover .order-row-header,
 .order-row--expanded .order-row-header {
   background: var(--color-bg);
@@ -56,10 +71,12 @@
 }
 
 .order-row-name {
-  flex: 1;
-  font-weight: var(--font-weight-medium);
+  font-weight: var(--font-weight-light);
   font-size: var(--font-size-lg);
   color: var(--color-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .status-badge {
@@ -68,7 +85,7 @@
   padding: 2px 10px;
   border-radius: 999px;
   font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
+  font-weight: var(--font-weight-light);
   flex-shrink: 0;
 }
 
@@ -85,29 +102,54 @@
 .product-summary {
   font-size: var(--font-size-sm);
   color: var(--color-text-muted);
+}
+
+.order-row-edit,
+.order-row-delete {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 28px;
+  line-height: 1;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  opacity: 0;
+  transition:
+    opacity 0.15s,
+    color 0.15s,
+    background 0.15s,
+    border-color 0.15s;
   flex-shrink: 0;
-  min-width: 90px;
-  text-align: right;
+  font-family: inherit;
+}
+
+.order-row:hover .order-row-edit,
+.order-row:hover .order-row-delete {
+  opacity: 1;
+}
+
+.order-row-edit {
+  background: none;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  padding: 0 10px;
+}
+
+.order-row-edit:hover {
+  color: var(--color-text);
+  border-color: var(--color-text-muted);
 }
 
 .order-row-delete {
   background: none;
   border: none;
   color: var(--color-text-muted);
-  font-size: 1.25rem;
-  line-height: 1;
-  padding: 2px 6px;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  opacity: 0;
-  transition: opacity 0.15s, color 0.15s;
-  flex-shrink: 0;
-}
-
-.order-row:hover .order-row-delete {
-  opacity: 1;
+  font-size: 1.1rem;
+  padding: 0 6px;
 }
 
 .order-row-delete:hover {
+  background: #fee2e2;
   color: var(--color-danger);
 }

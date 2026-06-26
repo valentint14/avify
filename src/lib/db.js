@@ -50,6 +50,15 @@ function openDb(filePath) {
       'ALTER TABLE products ADD COLUMN template_id TEXT REFERENCES product_templates(id) ON DELETE SET NULL'
     );
   }
+  if (!cols.some((c) => c.name === 'quantity')) {
+    db.exec('ALTER TABLE products ADD COLUMN quantity INTEGER NOT NULL DEFAULT 1');
+  }
+  if (!cols.some((c) => c.name === 'additional_info')) {
+    db.exec('ALTER TABLE products ADD COLUMN additional_info TEXT');
+  }
+  db.exec(
+    'CREATE UNIQUE INDEX IF NOT EXISTS idx_products_order_template ON products (order_id, template_id) WHERE template_id IS NOT NULL'
+  );
   return db;
 }
 

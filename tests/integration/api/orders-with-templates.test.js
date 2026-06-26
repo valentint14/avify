@@ -62,13 +62,13 @@ describe('POST /api/orders with templateIds', () => {
     expect(products[0].templateId).toBeTruthy();
   });
 
-  it('allows duplicate templateIds in same order', async () => {
+  it('deduplicates templateIds — one product per template per order', async () => {
     const t = await createTemplate('Place card');
     const res = await callPost({ name: 'Duplicates', templateIds: [t.id, t.id] });
     expect(res.status).toBe(201);
     const { products } = await res.json();
-    expect(products).toHaveLength(2);
-    expect(products.every((p) => p.name === 'Place card')).toBe(true);
+    expect(products).toHaveLength(1);
+    expect(products[0].name).toBe('Place card');
   });
 
   it('skips unknown templateIds silently', async () => {

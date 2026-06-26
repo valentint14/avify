@@ -2,7 +2,7 @@
 
 import '../styles/order-list.css';
 
-export default function OrderRow({ order, isExpanded, onToggle, onDelete }) {
+export default function OrderRow({ order, isExpanded, onToggle, onDelete, onEdit }) {
   const statusLabel = order.status === 'finalizata' ? 'Finalizată' : 'În progres';
   const statusClass = `status-badge status-badge--${order.status}`;
 
@@ -29,18 +29,31 @@ export default function OrderRow({ order, isExpanded, onToggle, onDelete }) {
     >
       <div className="order-row-header">
         <span className="order-row-chevron">{isExpanded ? '▼' : '▶'}</span>
-        <span className="order-row-name">{order.name}</span>
-        <span className={statusClass}>{statusLabel}</span>
-        <span className="product-summary">
-          {order.doneCount} / {order.productCount} gata
-        </span>
-        <button
-          className="order-row-delete"
-          aria-label={`Șterge comanda ${order.name}`}
-          onClick={handleDeleteClick}
-        >
-          ×
-        </button>
+
+        <div className="order-row-identity">
+          <span className="order-row-name">{order.name}</span>
+          <span className={statusClass}>{statusLabel}</span>
+        </div>
+
+        <div className="order-row-actions">
+          <span className="product-summary">
+            {order.doneCount} / {order.productCount} gata
+          </span>
+          <button
+            className="order-row-edit"
+            aria-label={`Editează produsele din comanda ${order.name}`}
+            onClick={(e) => { e.stopPropagation(); onEdit(order.id); }}
+          >
+            Editează
+          </button>
+          <button
+            className="order-row-delete"
+            aria-label={`Șterge comanda ${order.name}`}
+            onClick={handleDeleteClick}
+          >
+            ×
+          </button>
+        </div>
       </div>
     </div>
   );

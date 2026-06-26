@@ -62,11 +62,13 @@ function deleteOrder(id) {
 function createOrderWithProducts(name, templateIds = []) {
   const { createProductFromTemplate } = require('./products.js');
   const db = getDb();
+  // Deduplicate: one catalog product per order per template
+  const uniqueTemplateIds = [...new Set(templateIds)];
   db.exec('BEGIN');
   try {
     const order = createOrder(name);
     const products = [];
-    for (const templateId of templateIds) {
+    for (const templateId of uniqueTemplateIds) {
       const product = createProductFromTemplate(order.id, templateId);
       if (product) products.push(product);
     }

@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import '../styles/catalog.css';
 
-export default function CatalogSelector({ mode = 'multi', onSelectionChange, placeholder = 'Caută produse din catalog…' }) {
+export default function CatalogSelector({ mode = 'multi', onSelectionChange, placeholder = 'Caută produse din catalog…', excludedIds = [] }) {
   const [allTemplates, setAllTemplates] = useState([]);
   const [query, setQuery] = useState('');
   const [selected, setSelected] = useState([]);
@@ -27,9 +27,13 @@ export default function CatalogSelector({ mode = 'multi', onSelectionChange, pla
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+
+  const selectedIds = new Set(selected.map((t) => t.id));
+  const excluded = new Set(excludedIds);
+  const available = allTemplates.filter((t) => !selectedIds.has(t.id) && !excluded.has(t.id));
   const filtered = query
-    ? allTemplates.filter((t) => t.name.toLowerCase().includes(query.toLowerCase()))
-    : allTemplates;
+    ? available.filter((t) => t.name.toLowerCase().includes(query.toLowerCase()))
+    : available;
 
   function selectTemplate(template) {
     let next;
@@ -52,38 +56,37 @@ export default function CatalogSelector({ mode = 'multi', onSelectionChange, pla
 
   return (
     <div className="catalog-selector" ref={containerRef}>
-      {mode === 'multi' && selected.length > 0 && (
-        <div className="catalog-selector-chips">
-          {selected.map((t, i) => (
-            <span key={`${t.id}-${i}`} className="catalog-chip">
-              {t.name}
-              <button
-                type="button"
-                className="catalog-chip-remove"
-                aria-label={`Elimină ${t.name}`}
-                onClick={() => removeSelected(t.id)}
-              >
-                ×
-              </button>
-            </span>
-          ))}
-        </div>
-      )}
-
-      <input
-        className="catalog-selector-input"
-        type="text"
-        placeholder={placeholder}
-        value={query}
-        onChange={(e) => {
-          setQuery(e.target.value);
-          setOpen(true);
-        }}
-        onFocus={() => setOpen(true)}
-        onClick={() => setOpen(true)}
-        aria-label="Caută produse din catalog"
-        autoComplete="off"
-      />
+      <div
+        className="catalog-selector-field"
+        onClick={() => { setOpen(true); }}
+      >
+        {mode === 'multi' && selected.map((t, i) => (
+          <span key={`${t.id}-${i}`} className="catalog-chip">
+            {t.name}
+            <button
+              type="button"
+              className="catalog-chip-remove"
+              aria-label={`Elimină ${t.name}`}
+              onClick={(e) => { e.stopPropagation(); removeSelected(t.id); }}
+            >
+              ×
+            </button>
+          </span>
+        ))}
+        <input
+          className="catalog-selector-input"
+          type="text"
+          placeholder={selected.length === 0 ? placeholder : 'Selectează mai multe produse…'}
+          value={query}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            setOpen(true);
+          }}
+          onFocus={() => setOpen(true)}
+          aria-label="Caută produse din catalog"
+          autoComplete="off"
+        />
+      </div>
 
       {open && (
         <div className="catalog-selector-dropdown">

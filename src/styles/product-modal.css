@@ -1,0 +1,280 @@
+.product-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s;
+}
+
+.product-modal-overlay--open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.product-modal-content {
+  position: relative;
+  background: #fff;
+  border-radius: 8px;
+  padding: 24px;
+  max-width: 480px;
+  width: 90%;
+  max-height: 70vh;
+  overflow-y: auto;
+  transform: scale(0.96);
+  transition: transform 0.15s;
+}
+
+.product-modal-overlay--open .product-modal-content {
+  transform: scale(1);
+}
+
+.product-modal-title {
+  font-weight: 600;
+  font-size: 1rem;
+  margin: 0 0 12px 0;
+  padding-right: 28px;
+  color: #111;
+}
+
+.product-modal-body {
+  white-space: pre-wrap;
+  line-height: 1.5;
+  font-size: 0.875rem;
+  color: #374151;
+  margin: 0;
+}
+
+.product-modal-close {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.25rem;
+  color: #6b7280;
+  line-height: 1;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
+.product-modal-close:hover {
+  background: #f3f4f6;
+  color: #111;
+}
+
+/* ── Edit Order Modal ─────────────────────────────────────────── */
+
+.edit-modal {
+  position: relative;
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-modal);
+  width: 90%;
+  max-width: 560px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transform: scale(0.97);
+  transition: transform 0.15s;
+}
+
+.product-modal-overlay--open .edit-modal {
+  transform: scale(1);
+}
+
+.edit-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-lg);
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.edit-modal-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text);
+  margin: 0;
+}
+
+.edit-modal-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.4rem;
+  color: var(--color-text-muted);
+  line-height: 1;
+  padding: 4px 6px;
+  border-radius: var(--radius-sm);
+  transition: background 0.12s, color 0.12s;
+}
+
+.edit-modal-close:hover {
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+.edit-modal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-md) var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.edit-modal-empty {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  text-align: center;
+  padding: var(--space-xl) 0;
+}
+
+.edit-modal-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.edit-modal-product {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.edit-modal-product-name {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
+}
+
+.edit-modal-fields {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-sm) var(--space-md);
+  align-items: start;
+}
+
+.edit-modal-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.edit-modal-field--qty {
+  grid-column: 1;
+}
+
+.edit-modal-field--info {
+  grid-column: 2;
+}
+
+.edit-modal-label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-muted);
+}
+
+.edit-modal-input-qty {
+  width: 72px;
+  padding: 6px 8px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-base);
+  color: var(--color-text);
+  background: var(--color-surface);
+  transition: border-color 0.12s;
+}
+
+.edit-modal-input-qty:focus {
+  outline: none;
+  border-color: #6366f1;
+}
+
+.edit-modal-textarea {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  background: var(--color-surface);
+  resize: vertical;
+  font-family: inherit;
+  line-height: 1.5;
+  transition: border-color 0.12s;
+}
+
+.edit-modal-textarea:focus {
+  outline: none;
+  border-color: #6366f1;
+}
+
+.edit-modal-textarea::placeholder {
+  color: var(--color-text-muted);
+}
+
+.edit-modal-error {
+  font-size: var(--font-size-sm);
+  color: var(--color-danger);
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: var(--radius-sm);
+  padding: var(--space-sm) var(--space-md);
+}
+
+.edit-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-sm);
+  padding: var(--space-md) var(--space-lg);
+  border-top: 1px solid var(--color-border);
+  flex-shrink: 0;
+  background: var(--color-bg);
+}
+
+.edit-modal-btn {
+  padding: 7px var(--space-lg);
+  border-radius: var(--radius-sm);
+  border: none;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: opacity 0.12s, background 0.12s;
+}
+
+.edit-modal-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.edit-modal-btn--secondary {
+  background: var(--color-border);
+  color: var(--color-text);
+}
+
+.edit-modal-btn--secondary:hover:not(:disabled) {
+  background: var(--color-border-hover);
+}
+
+.edit-modal-btn--primary {
+  background: #4f46e5;
+  color: #fff;
+}
+
+.edit-modal-btn--primary:hover:not(:disabled) {
+  background: #4338ca;
+}
