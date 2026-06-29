@@ -1,5 +1,7 @@
 import './globals.css';
 import '../styles/form.css';
+import '../styles/navbar.css';
+import Navbar from '../components/Navbar.js';
 
 export const metadata = {
   title: 'Avify — Comenzi Papetărie',
@@ -9,7 +11,10 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="ro">
-      <body>{children}</body>
+      <body>
+        <Navbar />
+        <main>{children}</main>
+      </body>
     </html>
   );
 }

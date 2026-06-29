@@ -18,6 +18,8 @@ data/avify.db
 
 # testing
 coverage/
+test-results/
+playwright-report/
 
 # OS
 .DS_Store
