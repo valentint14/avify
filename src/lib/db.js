@@ -56,9 +56,32 @@ function openDb(filePath) {
   if (!cols.some((c) => c.name === 'additional_info')) {
     db.exec('ALTER TABLE products ADD COLUMN additional_info TEXT');
   }
+  if (!cols.some((c) => c.name === 'unit_price')) {
+    db.exec('ALTER TABLE products ADD COLUMN unit_price REAL DEFAULT 0');
+  }
   db.exec(
     'CREATE UNIQUE INDEX IF NOT EXISTS idx_products_order_template ON products (order_id, template_id) WHERE template_id IS NOT NULL'
   );
+
+  // Order metadata fields (feature 006): client, dates, financials, status flags
+  const orderCols = db.prepare('PRAGMA table_info(orders)').all();
+  const orderMigrations = [
+    ['client', 'ALTER TABLE orders ADD COLUMN client TEXT'],
+    ['reception_date', 'ALTER TABLE orders ADD COLUMN reception_date TEXT'],
+    ['advance', 'ALTER TABLE orders ADD COLUMN advance REAL DEFAULT 0'],
+    ['county', 'ALTER TABLE orders ADD COLUMN county TEXT'],
+    ['contact_platform', 'ALTER TABLE orders ADD COLUMN contact_platform TEXT'],
+    ['event_date', 'ALTER TABLE orders ADD COLUMN event_date TEXT'],
+    ['delivery_date', 'ALTER TABLE orders ADD COLUMN delivery_date TEXT'],
+    ['profit', 'ALTER TABLE orders ADD COLUMN profit REAL DEFAULT 0'],
+    ['collected', 'ALTER TABLE orders ADD COLUMN collected INTEGER NOT NULL DEFAULT 0'],
+    ['delivered', 'ALTER TABLE orders ADD COLUMN delivered INTEGER NOT NULL DEFAULT 0'],
+  ];
+  for (const [name, sql] of orderMigrations) {
+    if (!orderCols.some((c) => c.name === name)) {
+      db.exec(sql);
+    }
+  }
   return db;
 }
 

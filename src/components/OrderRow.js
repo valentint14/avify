@@ -33,9 +33,25 @@ export default function OrderRow({ order, isExpanded, onToggle, onDelete, onEdit
         <div className="order-row-identity">
           <span className="order-row-name">{order.name}</span>
           <span className={statusClass}>{statusLabel}</span>
+          <div className="order-row-badges">
+            <span className={`order-row-badge${order.collected ? ' order-row-badge--active' : ''}`}>
+              Încasată
+            </span>
+            <span className={`order-row-badge${order.delivered ? ' order-row-badge--active' : ''}`}>
+              Livrată
+            </span>
+          </div>
         </div>
 
         <div className="order-row-actions">
+          <span className="order-row-total">
+            <span className="order-row-total-label">Total: </span>
+            {Number(order.total ?? 0).toFixed(2)} RON
+          </span>
+          <span className="order-row-profit">
+            <span className="order-row-profit-label">Profit: </span>
+            {Number(order.profit ?? 0).toFixed(2)} RON
+          </span>
           <span className="product-summary">
             {order.doneCount} / {order.productCount} gata
           </span>

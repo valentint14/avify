@@ -7,8 +7,9 @@ export async function PATCH(request, { params }) {
     const hasStatus = typeof body.status === 'string' && body.status.trim() !== '';
     const hasQuantity = body.quantity !== undefined;
     const hasAdditionalInfo = body.additionalInfo !== undefined;
+    const hasUnitPrice = body.unitPrice !== undefined;
 
-    if (!hasStatus && !hasQuantity && !hasAdditionalInfo) {
+    if (!hasStatus && !hasQuantity && !hasAdditionalInfo && !hasUnitPrice) {
       return Response.json({ error: 'Cel puțin un câmp trebuie furnizat.' }, { status: 400 });
     }
 
@@ -23,16 +24,23 @@ export async function PATCH(request, { params }) {
       if (!product) return Response.json({ error: 'Produsul nu a fost găsit.' }, { status: 404 });
     }
 
-    if (hasQuantity || hasAdditionalInfo) {
+    if (hasQuantity || hasAdditionalInfo || hasUnitPrice) {
       if (hasQuantity) {
         const quantity = Math.trunc(Number(body.quantity));
         if (!Number.isFinite(quantity) || quantity < 1) {
           return Response.json({ error: 'Cantitatea trebuie să fie un număr întreg pozitiv.' }, { status: 400 });
         }
       }
+      if (hasUnitPrice) {
+        const unitPrice = Number(body.unitPrice);
+        if (!Number.isFinite(unitPrice) || unitPrice < 0) {
+          return Response.json({ error: 'Prețul unitar trebuie să fie un număr pozitiv.' }, { status: 400 });
+        }
+      }
       const fields = {};
       if (hasQuantity) fields.quantity = Math.trunc(Number(body.quantity));
       if (hasAdditionalInfo) fields.additionalInfo = body.additionalInfo;
+      if (hasUnitPrice) fields.unitPrice = Number(body.unitPrice);
       product = updateProduct(params.id, fields);
       if (!product) return Response.json({ error: 'Produsul nu a fost găsit.' }, { status: 404 });
     }

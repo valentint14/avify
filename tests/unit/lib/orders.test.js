@@ -6,7 +6,7 @@ jest.mock('../../../src/lib/db.js', () => {
   return { getDb: () => testDb, openDb };
 });
 
-const { getAllWithStatus, createOrder, deleteOrder } = require('../../../src/lib/orders.js');
+const { getAllWithStatus, getOrderById, createOrder, updateOrder, deleteOrder } = require('../../../src/lib/orders.js');
 
 let db;
 beforeAll(() => {
@@ -91,6 +91,104 @@ describe('createOrder', () => {
     expect(order.productCount).toBe(0);
     expect(order.doneCount).toBe(0);
     expect(order.createdAt).toBeTruthy();
+  });
+});
+
+// ── order metadata fields (feature 006) ─────────────────────────
+describe('order metadata fields', () => {
+  it('defaults new fields for a bare order', () => {
+    const order = createOrder('Defaults Test');
+    expect(order.client).toBeNull();
+    expect(order.receptionDate).toBeNull();
+    expect(order.advance).toBe(0);
+    expect(order.county).toBeNull();
+    expect(order.contactPlatform).toBeNull();
+    expect(order.eventDate).toBeNull();
+    expect(order.deliveryDate).toBeNull();
+    expect(order.profit).toBe(0);
+    expect(order.collected).toBe(false);
+    expect(order.delivered).toBe(false);
+  });
+
+  it('persists fields passed to createOrder', () => {
+    const order = createOrder('Create With Fields', {
+      client: 'Maria Ionescu',
+      advance: 500,
+      county: 'Cluj',
+      contactPlatform: 'Facebook',
+      collected: true,
+    });
+    expect(order.client).toBe('Maria Ionescu');
+    expect(order.advance).toBe(500);
+    expect(order.county).toBe('Cluj');
+    expect(order.contactPlatform).toBe('Facebook');
+    expect(order.collected).toBe(true);
+    expect(order.delivered).toBe(false);
+  });
+
+  it('coerces collected/delivered to booleans', () => {
+    const order = createOrder('Bool Test', { collected: true, delivered: false });
+    const found = getOrderById(order.id);
+    expect(found.collected).toBe(true);
+    expect(found.delivered).toBe(false);
+  });
+});
+
+// ── updateOrder ─────────────────────────────────────────────────
+describe('updateOrder', () => {
+  it('updates provided fields and returns the order', () => {
+    const order = createOrder('Update Test');
+    const updated = updateOrder(order.id, { client: 'Ion Pop', profit: 150, delivered: true });
+    expect(updated.client).toBe('Ion Pop');
+    expect(updated.profit).toBe(150);
+    expect(updated.delivered).toBe(true);
+    expect(updated.collected).toBe(false);
+  });
+
+  it('returns null when no known fields are supplied', () => {
+    const order = createOrder('No Fields Test');
+    expect(updateOrder(order.id, {})).toBeNull();
+    expect(updateOrder(order.id, { bogus: 1 })).toBeNull();
+  });
+
+  it('returns null for an unknown order id', () => {
+    expect(updateOrder('nonexistent-id', { client: 'X' })).toBeNull();
+  });
+
+  it('clears a date field when set to empty string', () => {
+    const order = createOrder('Clear Date', { eventDate: '2026-08-15' });
+    expect(getOrderById(order.id).eventDate).toBe('2026-08-15');
+    updateOrder(order.id, { eventDate: '' });
+    expect(getOrderById(order.id).eventDate).toBeNull();
+  });
+});
+
+// ── order total computation (feature 006) ───────────────────────
+describe('order total', () => {
+  it('is 0 for an order with no products', () => {
+    createOrder('Empty Total');
+    const [order] = getAllWithStatus();
+    expect(order.total).toBe(0);
+  });
+
+  it('sums quantity × unit_price across products', () => {
+    const order = createOrder('Total Test');
+    db.prepare(
+      'INSERT INTO products (id, order_id, name, status, quantity, unit_price, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)'
+    ).run('tp1', order.id, 'Invitații', 'de_facut', 3, 50, new Date().toISOString());
+    db.prepare(
+      'INSERT INTO products (id, order_id, name, status, quantity, unit_price, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)'
+    ).run('tp2', order.id, 'Meniuri', 'de_facut', 2, 120, new Date().toISOString());
+    const found = getOrderById(order.id);
+    expect(found.total).toBe(390); // 3×50 + 2×120
+  });
+
+  it('treats missing unit_price as 0', () => {
+    const order = createOrder('Null Price');
+    db.prepare(
+      'INSERT INTO products (id, order_id, name, status, quantity, created_at) VALUES (?, ?, ?, ?, ?, ?)'
+    ).run('tp3', order.id, 'No Price', 'de_facut', 5, new Date().toISOString());
+    expect(getOrderById(order.id).total).toBe(0);
   });
 });
 

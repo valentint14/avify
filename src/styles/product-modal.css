@@ -138,6 +138,73 @@
   padding: var(--space-xl) 0;
 }
 
+/* ── Order Details section (feature 006) ──────────────────────── */
+
+.edit-modal-section-title {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text);
+  margin: 0 0 var(--space-sm);
+}
+
+.edit-modal-order-details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-sm) var(--space-md);
+  padding-bottom: var(--space-md);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.edit-modal-order-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.edit-modal-order-field--full {
+  grid-column: 1 / -1;
+}
+
+.edit-modal-input {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-base);
+  color: var(--color-text);
+  background: var(--color-surface);
+  font-family: inherit;
+  transition: border-color 0.12s;
+}
+
+.edit-modal-input:focus {
+  outline: none;
+  border-color: #6366f1;
+}
+
+.edit-modal-checks {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: var(--space-lg);
+  flex-wrap: wrap;
+}
+
+.edit-modal-check {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: var(--font-size-base);
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.edit-modal-check input {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
 .edit-modal-list {
   display: flex;
   flex-direction: column;
@@ -177,8 +244,27 @@
   grid-column: 1;
 }
 
-.edit-modal-field--info {
+.edit-modal-field--unit-price {
   grid-column: 2;
+}
+
+.edit-modal-field--info {
+  grid-column: 1 / -1;
+}
+
+.edit-modal-total-summary {
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: var(--space-sm);
+  padding-top: var(--space-sm);
+  font-size: var(--font-size-base);
+  color: var(--color-text);
+}
+
+.edit-modal-total-summary strong {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
 }
 
 .edit-modal-label {

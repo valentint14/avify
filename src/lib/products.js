@@ -12,6 +12,7 @@ function parseRow(row) {
     templateId: row.template_id ?? null,
     quantity: Number(row.quantity ?? 1),
     additionalInfo: row.additional_info ?? null,
+    unitPrice: Number(row.unit_price ?? 0),
     createdAt: row.created_at,
   };
 }
@@ -42,7 +43,6 @@ function createProductFromTemplate(orderId, templateId, quantity = 1, additional
 
 function updateProduct(productId, fields) {
   const db = getDb();
-  const allowed = ['quantity', 'additional_info'];
   const setClauses = [];
   const values = [];
   if (fields.quantity !== undefined) {
@@ -52,6 +52,10 @@ function updateProduct(productId, fields) {
   if (fields.additionalInfo !== undefined) {
     setClauses.push('additional_info = ?');
     values.push(fields.additionalInfo);
+  }
+  if (fields.unitPrice !== undefined) {
+    setClauses.push('unit_price = ?');
+    values.push(fields.unitPrice);
   }
   if (setClauses.length === 0) return null;
   values.push(productId);
