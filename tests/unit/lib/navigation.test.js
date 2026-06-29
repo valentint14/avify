@@ -3,10 +3,11 @@
 const { NAV_LINKS, isLinkActive } = require('../../../src/lib/navigation.js');
 
 describe('navigation links', () => {
-  test('exposes Comenzi (/) and Catalog Produse (/catalog) in order', () => {
+  test('exposes Comenzi (/), Catalog Produse (/catalog) and Stoc Materiale (/stoc-materiale) in order', () => {
     expect(NAV_LINKS).toEqual([
       { label: 'Comenzi', href: '/' },
       { label: 'Catalog Produse', href: '/catalog' },
+      { label: 'Stoc Materiale', href: '/stoc-materiale' },
     ]);
   });
 });

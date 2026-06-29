@@ -1,0 +1,215 @@
+/* ── Stoc Materiale page (feature 008) ────────────────────────── */
+.materials-page {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.materials-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.materials-title {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text);
+}
+
+.materials-subtitle {
+  font-size: var(--font-size-base);
+  color: var(--color-text-muted);
+}
+
+/* Low-stock alert */
+.materials-alert {
+  border: 1px solid var(--color-warn);
+  background: #fffbeb;
+  color: #92400e;
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  animation: avify-fade-slide-in var(--transition-base) var(--ease-out);
+}
+
+.materials-alert-title {
+  font-weight: var(--font-weight-bold);
+}
+
+.materials-alert-list {
+  margin: 0;
+  padding-left: var(--space-lg);
+  font-size: var(--font-size-sm);
+}
+
+/* Add section */
+.materials-add-section {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  padding: var(--space-md);
+  box-shadow: var(--shadow-card);
+}
+
+.materials-add-title {
+  font-weight: var(--font-weight-medium);
+  margin-bottom: var(--space-sm);
+}
+
+/* Material form */
+.material-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-sm);
+}
+
+.material-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.material-form-field--name {
+  flex: 1;
+  min-width: 160px;
+}
+
+.material-form-label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-muted);
+}
+
+.material-form-input {
+  padding: var(--space-sm) var(--space-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-base);
+  color: var(--color-text);
+  background: var(--color-surface);
+  font-family: inherit;
+  width: 100%;
+}
+
+.material-form-input--num {
+  max-width: 120px;
+}
+
+.material-form-input:focus {
+  outline: none;
+  border-color: #2563eb;
+}
+
+.material-form-btn {
+  padding: var(--space-sm) var(--space-md);
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.material-form-btn--secondary {
+  background: var(--color-border);
+  color: var(--color-text);
+}
+
+.material-form-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.material-form-error {
+  width: 100%;
+  font-size: var(--font-size-sm);
+  color: var(--color-danger);
+}
+
+/* Material list */
+.materials-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.materials-empty {
+  color: var(--color-text-muted);
+  text-align: center;
+  padding: var(--space-xl);
+}
+
+.material-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+}
+
+.material-row--low {
+  border-color: var(--color-warn);
+}
+
+.material-row-name {
+  flex: 1;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
+}
+
+.material-row-stock {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.material-row-low-badge {
+  font-size: var(--font-size-sm);
+  color: var(--color-warn);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+}
+
+.material-row-actions {
+  display: flex;
+  gap: var(--space-xs);
+  flex-shrink: 0;
+}
+
+.material-row-btn {
+  padding: var(--space-xs) var(--space-md);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.material-row-btn:hover {
+  color: var(--color-text);
+  border-color: var(--color-border-hover);
+}
+
+.material-row-btn--danger {
+  color: var(--color-danger);
+  border-color: var(--color-danger);
+}
+
+.material-row-btn--danger:hover {
+  background: #fee2e2;
+}

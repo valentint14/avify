@@ -2,16 +2,9 @@
 
 import '../styles/order-list.css';
 
-export default function OrderRow({ order, isExpanded, onToggle, onDelete, onEdit }) {
+export default function OrderRow({ order, isExpanded, onToggle, onEdit }) {
   const statusLabel = order.status === 'finalizata' ? 'Finalizată' : 'În progres';
   const statusClass = `status-badge status-badge--${order.status}`;
-
-  function handleDeleteClick(e) {
-    e.stopPropagation();
-    if (window.confirm(`Ștergi comanda "${order.name}"? Toate produsele vor fi șterse.`)) {
-      onDelete(order.id);
-    }
-  }
 
   return (
     <div
@@ -61,13 +54,6 @@ export default function OrderRow({ order, isExpanded, onToggle, onDelete, onEdit
             onClick={(e) => { e.stopPropagation(); onEdit(order.id); }}
           >
             Editează
-          </button>
-          <button
-            className="order-row-delete"
-            aria-label={`Șterge comanda ${order.name}`}
-            onClick={handleDeleteClick}
-          >
-            ×
           </button>
         </div>
       </div>

@@ -2,11 +2,13 @@
 
 import { useState } from 'react';
 import CatalogProductForm from './CatalogProductForm.js';
+import RecipeEditor from './RecipeEditor.js';
 import '../styles/catalog.css';
 
 export default function CatalogPage({ initialTemplates }) {
   const [templates, setTemplates] = useState(initialTemplates);
   const [editingId, setEditingId] = useState(null);
+  const [recipeId, setRecipeId] = useState(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
   const [error, setError] = useState('');
 
@@ -98,52 +100,70 @@ export default function CatalogPage({ initialTemplates }) {
               />
             </div>
           ) : (
-            <div key={t.id} className="catalog-item">
-              <div className="catalog-item-info">
-                <div className="catalog-item-name">{t.name}</div>
-                {t.description && (
-                  <div className="catalog-item-desc">{t.description}</div>
+            <div
+              key={t.id}
+              className={`catalog-item${recipeId === t.id ? ' catalog-item--recipe' : ''}`}
+            >
+              <div className="catalog-item-row">
+                <div className="catalog-item-info">
+                  <div className="catalog-item-name">{t.name}</div>
+                  {t.description && (
+                    <div className="catalog-item-desc">{t.description}</div>
+                  )}
+                </div>
+
+                {confirmDeleteId === t.id ? (
+                  <div className="catalog-delete-confirm">
+                    <span className="catalog-delete-confirm-text">Ești sigur?</span>
+                    <button
+                      className="catalog-item-btn catalog-item-btn--danger"
+                      onClick={() => handleDelete(t.id)}
+                    >
+                      Confirmă
+                    </button>
+                    <button
+                      className="catalog-item-btn"
+                      onClick={() => setConfirmDeleteId(null)}
+                    >
+                      Anulează
+                    </button>
+                  </div>
+                ) : (
+                  <div className="catalog-item-actions">
+                    <button
+                      className="catalog-item-btn"
+                      onClick={() => {
+                        setRecipeId((prev) => (prev === t.id ? null : t.id));
+                        setEditingId(null);
+                        setConfirmDeleteId(null);
+                      }}
+                    >
+                      {recipeId === t.id ? 'Ascunde rețeta' : 'Rețetă'}
+                    </button>
+                    <button
+                      className="catalog-item-btn"
+                      onClick={() => {
+                        setEditingId(t.id);
+                        setRecipeId(null);
+                        setConfirmDeleteId(null);
+                      }}
+                    >
+                      Editează
+                    </button>
+                    <button
+                      className="catalog-item-btn catalog-item-btn--danger"
+                      onClick={() => {
+                        setConfirmDeleteId(t.id);
+                        setEditingId(null);
+                      }}
+                    >
+                      Șterge
+                    </button>
+                  </div>
                 )}
               </div>
 
-              {confirmDeleteId === t.id ? (
-                <div className="catalog-delete-confirm">
-                  <span className="catalog-delete-confirm-text">Ești sigur?</span>
-                  <button
-                    className="catalog-item-btn catalog-item-btn--danger"
-                    onClick={() => handleDelete(t.id)}
-                  >
-                    Confirmă
-                  </button>
-                  <button
-                    className="catalog-item-btn"
-                    onClick={() => setConfirmDeleteId(null)}
-                  >
-                    Anulează
-                  </button>
-                </div>
-              ) : (
-                <div className="catalog-item-actions">
-                  <button
-                    className="catalog-item-btn"
-                    onClick={() => {
-                      setEditingId(t.id);
-                      setConfirmDeleteId(null);
-                    }}
-                  >
-                    Editează
-                  </button>
-                  <button
-                    className="catalog-item-btn catalog-item-btn--danger"
-                    onClick={() => {
-                      setConfirmDeleteId(t.id);
-                      setEditingId(null);
-                    }}
-                  >
-                    Șterge
-                  </button>
-                </div>
-              )}
+              {recipeId === t.id && <RecipeEditor templateId={t.id} />}
             </div>
           )
         )}

@@ -5,6 +5,7 @@ import ProductDetailsModal from './ProductDetailsModal.js';
 
 export default function ProductCard({ product, onDelete }) {
   const [modalOpen, setModalOpen] = useState(false);
+  const [confirming, setConfirming] = useState(false);
 
   function handleCardClick(e) {
     if (e.target.closest('.product-card-delete')) return;
@@ -13,9 +14,7 @@ export default function ProductCard({ product, onDelete }) {
 
   function handleDeleteClick(e) {
     e.stopPropagation();
-    if (window.confirm(`Ștergi produsul "${product.name}"?`)) {
-      onDelete(product.id);
-    }
+    setConfirming(true);
   }
 
   function handleKeyDown(e) {
@@ -23,6 +22,26 @@ export default function ProductCard({ product, onDelete }) {
       e.preventDefault();
       setModalOpen(true);
     }
+  }
+
+  if (confirming) {
+    return (
+      <div className="product-card product-card--confirm" role="alertdialog" aria-label={`Confirmă ștergerea produsului ${product.name}`}>
+        <span className="product-card-confirm-text">Ștergi „{product.name}&rdquo;?</span>
+        <button
+          className="product-card-confirm-btn product-card-confirm-btn--yes"
+          onClick={(e) => { e.stopPropagation(); onDelete(product.id); }}
+        >
+          Șterge
+        </button>
+        <button
+          className="product-card-confirm-btn"
+          onClick={(e) => { e.stopPropagation(); setConfirming(false); }}
+        >
+          Anulează
+        </button>
+      </div>
+    );
   }
 
   return (

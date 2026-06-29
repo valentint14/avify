@@ -8,7 +8,7 @@
   z-index: 1000;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.15s;
+  transition: opacity var(--transition-base) var(--ease-out);
 }
 
 .product-modal-overlay--open {
@@ -26,7 +26,7 @@
   max-height: 70vh;
   overflow-y: auto;
   transform: scale(0.96);
-  transition: transform 0.15s;
+  transition: transform var(--transition-base) var(--ease-out);
 }
 
 .product-modal-overlay--open .product-modal-content {
@@ -82,7 +82,7 @@
   flex-direction: column;
   overflow: hidden;
   transform: scale(0.97);
-  transition: transform 0.15s;
+  transition: transform var(--transition-base) var(--ease-out);
 }
 
 .product-modal-overlay--open .edit-modal {
@@ -363,4 +363,33 @@
 
 .edit-modal-btn--primary:hover:not(:disabled) {
   background: #4338ca;
+}
+
+.edit-modal-btn--danger {
+  background: none;
+  border: 1px solid var(--color-danger);
+  color: var(--color-danger);
+}
+
+.edit-modal-btn--danger:hover:not(:disabled) {
+  background: #fee2e2;
+}
+
+/* Push the delete action to the left, away from Cancel/Save */
+.edit-modal-btn--delete {
+  margin-right: auto;
+}
+
+/* Inline delete-confirmation footer */
+.edit-modal-footer--confirm {
+  flex-wrap: wrap;
+  animation: avify-fade-slide-in var(--transition-fast) var(--ease-out);
+}
+
+.edit-modal-confirm-text {
+  flex: 1;
+  min-width: 100%;
+  font-size: var(--font-size-sm);
+  color: var(--color-danger);
+  margin-bottom: var(--space-xs);
 }

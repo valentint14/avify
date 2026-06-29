@@ -38,11 +38,36 @@ const SCHEMA = `
 
   CREATE INDEX IF NOT EXISTS idx_products_order_id ON products (order_id);
   CREATE INDEX IF NOT EXISTS idx_products_status   ON products (status);
+
+  CREATE TABLE IF NOT EXISTS materials (
+    id            TEXT NOT NULL PRIMARY KEY,
+    name          TEXT NOT NULL,
+    current_stock REAL NOT NULL DEFAULT 0,
+    min_stock     REAL NOT NULL DEFAULT 0,
+    unit          TEXT,
+    created_at    TEXT NOT NULL
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_materials_name ON materials (name);
+
+  CREATE TABLE IF NOT EXISTS recipe_lines (
+    id            TEXT NOT NULL PRIMARY KEY,
+    template_id   TEXT NOT NULL REFERENCES product_templates(id) ON DELETE CASCADE,
+    material_id   TEXT NOT NULL REFERENCES materials(id) ON DELETE CASCADE,
+    qty_per_piece REAL NOT NULL,
+    created_at    TEXT NOT NULL
+  );
+
+  CREATE UNIQUE INDEX IF NOT EXISTS idx_recipe_lines_unique   ON recipe_lines (template_id, material_id);
+  CREATE INDEX IF NOT EXISTS        idx_recipe_lines_template ON recipe_lines (template_id);
 `;
 
 function openDb(filePath) {
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
   const db = new DatabaseSync(filePath);
+  // Enforce declared foreign keys so ON DELETE CASCADE / SET NULL fire
+  // (e.g. deleting a material removes its recipe lines).
+  db.exec('PRAGMA foreign_keys = ON');
   db.exec(SCHEMA);
   const cols = db.prepare('PRAGMA table_info(products)').all();
   if (!cols.some((c) => c.name === 'template_id')) {
@@ -76,6 +101,7 @@ function openDb(filePath) {
     ['profit', 'ALTER TABLE orders ADD COLUMN profit REAL DEFAULT 0'],
     ['collected', 'ALTER TABLE orders ADD COLUMN collected INTEGER NOT NULL DEFAULT 0'],
     ['delivered', 'ALTER TABLE orders ADD COLUMN delivered INTEGER NOT NULL DEFAULT 0'],
+    ['stock_deducted', 'ALTER TABLE orders ADD COLUMN stock_deducted INTEGER NOT NULL DEFAULT 0'],
   ];
   for (const [name, sql] of orderMigrations) {
     if (!orderCols.some((c) => c.name === name)) {

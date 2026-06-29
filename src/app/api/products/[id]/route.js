@@ -1,5 +1,6 @@
 import { updateProductStatus, updateProduct, deleteProduct } from '../../../../lib/products.js';
 import { VALID_STAGES } from '../../../../lib/constants.js';
+import { deductStockForOrder } from '../../../../lib/stock.js';
 
 export async function PATCH(request, { params }) {
   try {
@@ -22,6 +23,14 @@ export async function PATCH(request, { params }) {
       }
       product = updateProductStatus(params.id, status);
       if (!product) return Response.json({ error: 'Produsul nu a fost găsit.' }, { status: 404 });
+      // A status change may complete the order — deduct material stock once.
+      // Isolated so a deduction error never corrupts the status update response.
+      try {
+        deductStockForOrder(product.orderId);
+      } catch {
+        // Intentionally swallowed: stock deduction is a side effect of the
+        // status change; surface the successful status update regardless.
+      }
     }
 
     if (hasQuantity || hasAdditionalInfo || hasUnitPrice) {

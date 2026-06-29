@@ -11,7 +11,7 @@ import '../styles/order-list.css';
 
 export default function OrderList({ initialOrders }) {
   const [orders, setOrders] = useState(initialOrders);
-  const [expandedOrderId, setExpandedOrderId] = useState(null);
+  const [expandedOrderIds, setExpandedOrderIds] = useState(() => new Set());
   const [editingOrderId, setEditingOrderId] = useState(null);
   const [boardRefreshKey, setBoardRefreshKey] = useState(0);
   const [filterState, setFilterState] = useState(DEFAULT_FILTERS);
@@ -29,7 +29,12 @@ export default function OrderList({ initialOrders }) {
   }
 
   function handleToggle(orderId) {
-    setExpandedOrderId((prev) => (prev === orderId ? null : orderId));
+    setExpandedOrderIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(orderId)) next.delete(orderId);
+      else next.add(orderId);
+      return next;
+    });
   }
 
   async function handleOrderAdded(newOrder) {
@@ -46,7 +51,12 @@ export default function OrderList({ initialOrders }) {
     const res = await fetch(`/api/orders/${orderId}`, { method: 'DELETE' });
     if (res.ok) {
       setOrders((prev) => prev.filter((o) => o.id !== orderId));
-      if (expandedOrderId === orderId) setExpandedOrderId(null);
+      setExpandedOrderIds((prev) => {
+        if (!prev.has(orderId)) return prev;
+        const next = new Set(prev);
+        next.delete(orderId);
+        return next;
+      });
     }
   }
 
@@ -85,12 +95,11 @@ export default function OrderList({ initialOrders }) {
         <div key={order.id} className="order-item">
           <OrderRow
             order={order}
-            isExpanded={expandedOrderId === order.id}
+            isExpanded={expandedOrderIds.has(order.id)}
             onToggle={handleToggle}
-            onDelete={handleDeleteOrder}
             onEdit={setEditingOrderId}
           />
-          {expandedOrderId === order.id && (
+          {expandedOrderIds.has(order.id) && (
             <ProductBoard
               orderId={order.id}
               onProductChange={handleProductChange}
@@ -104,6 +113,7 @@ export default function OrderList({ initialOrders }) {
           orderId={editingOrderId}
           onClose={() => setEditingOrderId(null)}
           onSaved={handleEditSaved}
+          onDelete={handleDeleteOrder}
         />
       )}
     </div>

@@ -2,6 +2,7 @@
   padding: var(--space-md);
   background: var(--color-bg);
   border-top: 1px solid var(--color-border);
+  animation: avify-fade-slide-in var(--transition-base) var(--ease-out);
 }
 
 .product-board-columns {
@@ -125,6 +126,51 @@
 
 .product-card-delete:hover {
   color: var(--color-danger);
+}
+
+/* Inline delete confirmation (replaces window.confirm) */
+.product-card--confirm {
+  border-color: var(--color-danger);
+  background: #fef2f2;
+  cursor: default;
+  animation: avify-fade-in var(--transition-fast) var(--ease-out);
+}
+
+.product-card-confirm-text {
+  flex: 1;
+  font-size: var(--font-size-sm);
+  color: var(--color-danger);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.product-card-confirm-btn {
+  background: none;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  font-size: 0.72rem;
+  line-height: 1;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  flex-shrink: 0;
+  font-family: inherit;
+}
+
+.product-card-confirm-btn:hover {
+  border-color: var(--color-border-hover);
+  color: var(--color-text);
+}
+
+.product-card-confirm-btn--yes {
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+}
+
+.product-card-confirm-btn--yes:hover {
+  background: var(--color-danger);
+  color: #fff;
 }
 
 .add-product-form {

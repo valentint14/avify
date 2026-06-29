@@ -19,14 +19,17 @@ const EMPTY_ORDER_FIELDS = {
   delivered: false,
 };
 
-export default function EditOrderModal({ orderId, onClose, onSaved }) {
+export default function EditOrderModal({ orderId, onClose, onSaved, onDelete }) {
   const [open, setOpen] = useState(false);
   const [products, setProducts] = useState([]);
   const [edits, setEdits] = useState({});
   const [orderFields, setOrderFields] = useState(EMPTY_ORDER_FIELDS);
+  const [orderName, setOrderName] = useState('');
   const [customPlatform, setCustomPlatform] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -43,6 +46,7 @@ export default function EditOrderModal({ orderId, onClose, onSaved }) {
         setProducts(list ?? []);
         const order = (orders ?? []).find((o) => o.id === orderId);
         if (order) {
+          setOrderName(order.name ?? '');
           const platform = order.contactPlatform ?? '';
           setCustomPlatform(platform !== '' && !CONTACT_PLATFORMS.includes(platform));
           setOrderFields({
@@ -185,9 +189,23 @@ export default function EditOrderModal({ orderId, onClose, onSaved }) {
     }
   }
 
+  async function performDelete() {
+    setDeleting(true);
+    setError('');
+    try {
+      await onDelete(orderId);
+      onClose();
+    } catch {
+      setError('Eroare la ștergerea comenzii.');
+      setDeleting(false);
+    }
+  }
+
   function handleOverlayClick(e) {
     if (e.target === e.currentTarget) onClose();
   }
+
+  const busy = saving || deleting;
 
   return createPortal(
     <div
@@ -423,24 +441,56 @@ export default function EditOrderModal({ orderId, onClose, onSaved }) {
         </div>
 
         {/* Footer */}
-        <div className="edit-modal-footer">
-          <button
-            type="button"
-            className="edit-modal-btn edit-modal-btn--secondary"
-            onClick={onClose}
-            disabled={saving}
-          >
-            Anulează
-          </button>
-          <button
-            type="button"
-            className="edit-modal-btn edit-modal-btn--primary"
-            onClick={handleSave}
-            disabled={saving || loading}
-          >
-            {saving ? 'Se salvează…' : 'Salvează'}
-          </button>
-        </div>
+        {confirmDelete ? (
+          <div className="edit-modal-footer edit-modal-footer--confirm">
+            <span className="edit-modal-confirm-text">
+              Ștergi comanda {orderName ? `„${orderName}"` : 'aceasta'}? Toate produsele vor fi șterse.
+            </span>
+            <button
+              type="button"
+              className="edit-modal-btn edit-modal-btn--secondary"
+              onClick={() => setConfirmDelete(false)}
+              disabled={deleting}
+            >
+              Anulează
+            </button>
+            <button
+              type="button"
+              className="edit-modal-btn edit-modal-btn--danger"
+              onClick={performDelete}
+              disabled={deleting}
+            >
+              {deleting ? 'Se șterge…' : 'Confirmă ștergerea'}
+            </button>
+          </div>
+        ) : (
+          <div className="edit-modal-footer">
+            <button
+              type="button"
+              className="edit-modal-btn edit-modal-btn--danger edit-modal-btn--delete"
+              onClick={() => setConfirmDelete(true)}
+              disabled={busy || loading}
+            >
+              Șterge comanda
+            </button>
+            <button
+              type="button"
+              className="edit-modal-btn edit-modal-btn--secondary"
+              onClick={onClose}
+              disabled={busy}
+            >
+              Anulează
+            </button>
+            <button
+              type="button"
+              className="edit-modal-btn edit-modal-btn--primary"
+              onClick={handleSave}
+              disabled={busy || loading}
+            >
+              {saving ? 'Se salvează…' : 'Salvează'}
+            </button>
+          </div>
+        )}
       </div>
     </div>,
     document.body

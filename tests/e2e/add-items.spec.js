@@ -81,14 +81,22 @@ test.describe('US5 — Add orders and products', () => {
     await expect(row.locator('.product-summary')).toContainText('1', { timeout: 3000 });
   });
 
-  test('delete an order removes it from the list', async ({ page, request }) => {
+  test('delete an order from the edit modal removes it from the list', async ({ page, request }) => {
     await request.post('/api/orders', { data: { name: 'Delete Me Order' } });
     await page.goto('/');
     const row = orderRow(page, 'Delete Me Order');
     await expect(row).toBeVisible();
 
-    page.on('dialog', (dialog) => dialog.accept());
-    await row.locator('.order-row-delete').click();
+    // Delete now lives inside the edit modal, with an inline two-step confirm
+    await row.hover();
+    await row.locator('.order-row-edit').click();
+    await expect(page.locator('.edit-modal')).toBeVisible();
+
+    await page.locator('.edit-modal-btn--delete').click();
+    // Inline confirmation footer appears — confirm the deletion
+    await page.locator('.edit-modal-footer--confirm .edit-modal-btn--danger').click();
+
+    await expect(page.locator('.edit-modal')).toHaveCount(0);
     await expect(row).not.toBeVisible({ timeout: 3000 });
   });
 });

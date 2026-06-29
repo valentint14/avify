@@ -52,6 +52,34 @@
 
   /* Navbar */
   --navbar-height: 56px;
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-fast: 130ms;
+  --transition-base: 220ms;
+}
+
+/* ── Shared motion ──────────────────────────────────────────── */
+@keyframes avify-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes avify-fade-slide-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Honour users who prefer reduced motion: collapse all animation. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 /* ── Reset ──────────────────────────────────────────────────── */
