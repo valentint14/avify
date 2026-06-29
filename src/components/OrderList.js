@@ -1,10 +1,12 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import OrderRow from './OrderRow.js';
 import AddOrderForm from './AddOrderForm.js';
+import OrderFilters from './OrderFilters.js';
 import ProductBoard from './ProductBoard.js';
 import EditOrderModal from './EditOrderModal.js';
+import { filterOrders, deriveOptions, DEFAULT_FILTERS } from '../lib/orderFilters.js';
 import '../styles/order-list.css';
 
 export default function OrderList({ initialOrders }) {
@@ -12,6 +14,19 @@ export default function OrderList({ initialOrders }) {
   const [expandedOrderId, setExpandedOrderId] = useState(null);
   const [editingOrderId, setEditingOrderId] = useState(null);
   const [boardRefreshKey, setBoardRefreshKey] = useState(0);
+  const [filterState, setFilterState] = useState(DEFAULT_FILTERS);
+
+  const countyOptions = useMemo(() => deriveOptions(orders, 'county'), [orders]);
+  const platformOptions = useMemo(() => deriveOptions(orders, 'contactPlatform'), [orders]);
+  const filteredOrders = useMemo(() => filterOrders(orders, filterState), [orders, filterState]);
+
+  function handleFilterChange(key, value) {
+    setFilterState((prev) => ({ ...prev, [key]: value }));
+  }
+
+  function handleFilterReset() {
+    setFilterState(DEFAULT_FILTERS);
+  }
 
   function handleToggle(orderId) {
     setExpandedOrderId((prev) => (prev === orderId ? null : orderId));
@@ -51,10 +66,22 @@ export default function OrderList({ initialOrders }) {
   return (
     <div className="order-list">
       <AddOrderForm onOrderAdded={handleOrderAdded} />
+      <OrderFilters
+        filters={filterState}
+        onChange={handleFilterChange}
+        onReset={handleFilterReset}
+        countyOptions={countyOptions}
+        platformOptions={platformOptions}
+      />
       {orders.length === 0 && (
         <p className="order-list-empty">Nu există comenzi. Adaugă prima comandă.</p>
       )}
-      {orders.map((order) => (
+      {orders.length > 0 && filteredOrders.length === 0 && (
+        <p className="order-list-empty" role="status">
+          Nicio comandă găsită pentru filtrele selectate.
+        </p>
+      )}
+      {filteredOrders.map((order) => (
         <div key={order.id} className="order-item">
           <OrderRow
             order={order}

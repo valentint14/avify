@@ -99,7 +99,8 @@ describe('order metadata fields', () => {
   it('defaults new fields for a bare order', () => {
     const order = createOrder('Defaults Test');
     expect(order.client).toBeNull();
-    expect(order.receptionDate).toBeNull();
+    // receptionDate auto-fills with today's date (YYYY-MM-DD) when not provided
+    expect(order.receptionDate).toBe(new Date().toISOString().slice(0, 10));
     expect(order.advance).toBe(0);
     expect(order.county).toBeNull();
     expect(order.contactPlatform).toBeNull();
