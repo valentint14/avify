@@ -17,7 +17,7 @@ async function createProduct(request, orderId, name) {
 }
 
 function orderRow(page, name) {
-  return page.locator('.order-row', { has: page.locator('.order-row-name', { hasText: name }) });
+  return page.getByTestId('order-row').filter({ hasText: name });
 }
 
 async function dragToColumn(page, sourceSelector, targetSelector) {
@@ -46,20 +46,20 @@ test.describe('US3 — Drag-and-drop products', () => {
     await page.goto('/');
     await orderRow(page, 'DnD Move Test').click();
 
-    const deFacutColumn = page.locator('.product-column').nth(0);
-    const printareColumn = page.locator('.product-column').nth(3);
+    const deFacutColumn = page.getByTestId('product-column').nth(0);
+    const printareColumn = page.getByTestId('product-column').nth(3);
 
-    await expect(deFacutColumn.locator('.product-card')).toHaveCount(1, { timeout: 5000 });
+    await expect(deFacutColumn.getByTestId('product-card')).toHaveCount(1, { timeout: 5000 });
 
-    await dragToColumn(page, '.product-column:nth-child(1) .product-card', '.product-column:nth-child(4)');
+    await dragToColumn(page, '[data-testid="product-column"]:nth-child(1) [data-testid="product-card"]', '[data-testid="product-column"]:nth-child(4)');
 
-    await expect(printareColumn.locator('.product-card')).toHaveCount(1, { timeout: 3000 });
-    await expect(deFacutColumn.locator('.product-card')).toHaveCount(0);
+    await expect(printareColumn.getByTestId('product-card')).toHaveCount(1, { timeout: 3000 });
+    await expect(deFacutColumn.getByTestId('product-card')).toHaveCount(0);
 
     // Reload and verify persistence
     await page.reload();
     await orderRow(page, 'DnD Move Test').click();
-    await expect(page.locator('.product-column').nth(3).locator('.product-card')).toHaveCount(1, { timeout: 5000 });
+    await expect(page.getByTestId('product-column').nth(3).getByTestId('product-card')).toHaveCount(1, { timeout: 5000 });
   });
 
   test('drop on same column does not move the card', async ({ page, request }) => {
@@ -69,12 +69,12 @@ test.describe('US3 — Drag-and-drop products', () => {
     await page.goto('/');
     await orderRow(page, 'DnD Same Column Test').click();
 
-    const deFacutColumn = page.locator('.product-column').nth(0);
-    await expect(deFacutColumn.locator('.product-card')).toHaveCount(1, { timeout: 5000 });
+    const deFacutColumn = page.getByTestId('product-column').nth(0);
+    await expect(deFacutColumn.getByTestId('product-card')).toHaveCount(1, { timeout: 5000 });
 
-    await dragToColumn(page, '.product-column:nth-child(1) .product-card', '.product-column:nth-child(1)');
+    await dragToColumn(page, '[data-testid="product-column"]:nth-child(1) [data-testid="product-card"]', '[data-testid="product-column"]:nth-child(1)');
 
     // Should still have 1 card (no move happened)
-    await expect(deFacutColumn.locator('.product-card')).toHaveCount(1);
+    await expect(deFacutColumn.getByTestId('product-card')).toHaveCount(1);
   });
 });

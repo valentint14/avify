@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import ProductCard from './ProductCard.js';
+import { cn } from '@/lib/utils';
 
 export default function ProductColumn({ stage, products, onDrop, onDeleteProduct }) {
   const [isDragOver, setIsDragOver] = useState(false);
@@ -30,25 +31,26 @@ export default function ProductColumn({ stage, products, onDrop, onDeleteProduct
 
   return (
     <div
-      className={`product-column${isDragOver ? ' drag-over' : ''}`}
+      className={cn(
+        'flex min-w-[160px] flex-1 flex-col rounded-md border-2 bg-card transition-colors',
+        isDragOver ? 'border-blue-500 bg-blue-50' : 'border-border'
+      )}
+      data-testid="product-column"
+      data-stage={stage.id}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
-      <div className="product-column-header">
-        <span className="product-column-label">{stage.label}</span>
-        <span className="product-column-count">{products.length}</span>
+      <div className="flex items-center justify-between border-b border-border px-3 py-2">
+        <span className="text-sm font-medium text-foreground" data-testid="product-column-label">{stage.label}</span>
+        <span className="rounded-full bg-muted px-2 text-xs text-muted-foreground">{products.length}</span>
       </div>
-      <div className="product-column-cards">
+      <div className="flex flex-col gap-2 p-2">
         {products.length === 0 && (
-          <p className="product-column-empty">Niciun produs în această coloană</p>
+          <p className="px-1 py-2 text-xs text-muted-foreground" data-testid="product-column-empty">Niciun produs în această coloană</p>
         )}
         {products.map((product) => (
-          <ProductCard
-            key={product.id}
-            product={product}
-            onDelete={onDeleteProduct}
-          />
+          <ProductCard key={product.id} product={product} onDelete={onDeleteProduct} />
         ))}
       </div>
     </div>

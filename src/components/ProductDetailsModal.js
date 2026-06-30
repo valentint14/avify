@@ -1,51 +1,23 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { createPortal } from 'react-dom';
-import '../styles/product-modal.css';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 export default function ProductDetailsModal({ product, onClose }) {
-  const [open, setOpen] = useState(false);
-
-  useEffect(() => {
-    const frame = requestAnimationFrame(() => setOpen(true));
-    return () => cancelAnimationFrame(frame);
-  }, []);
-
-  useEffect(() => {
-    function onKeyDown(e) {
-      if (e.key === 'Escape') onClose();
-    }
-    document.addEventListener('keydown', onKeyDown);
-    return () => document.removeEventListener('keydown', onKeyDown);
-  }, [onClose]);
-
-  function handleOverlayClick(e) {
-    if (e.target === e.currentTarget) onClose();
-  }
-
-  return createPortal(
-    <div
-      className={`product-modal-overlay${open ? ' product-modal-overlay--open' : ''}`}
-      onClick={handleOverlayClick}
-    >
-      <div
-        className="product-modal-content"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="pdm-title"
-      >
-        <button
-          className="product-modal-close"
-          aria-label="Închide"
-          onClick={onClose}
-        >
-          ×
-        </button>
-        <h2 id="pdm-title" className="product-modal-title">{product.name}</h2>
-        <p className="product-modal-body">{product.additionalInfo}</p>
-      </div>
-    </div>,
-    document.body
+  return (
+    <Dialog open onOpenChange={(o) => { if (!o) onClose(); }}>
+      <DialogContent className="max-w-md" data-testid="product-details-modal">
+        <DialogHeader>
+          <DialogTitle>{product.name}</DialogTitle>
+        </DialogHeader>
+        <p className="whitespace-pre-wrap text-sm leading-relaxed text-muted-foreground" data-testid="product-details-body">
+          {product.additionalInfo}
+        </p>
+      </DialogContent>
+    </Dialog>
   );
 }

@@ -30,7 +30,11 @@ async function addProduct(request, orderId, name, templateId, quantity) {
 }
 
 function materialRow(page, name) {
-  return page.locator('.material-row', { has: page.locator('.material-row-name', { hasText: name }) });
+  return page.getByTestId('material-row').filter({ hasText: name });
+}
+
+function catalogItem(page, name) {
+  return page.getByTestId('catalog-item').filter({ hasText: name });
 }
 
 test.describe('Feature 008 — Materials stock & recipes', () => {
@@ -42,7 +46,7 @@ test.describe('Feature 008 — Materials stock & recipes', () => {
 
   test('US1: add a material via UI and it persists across reload', async ({ page }) => {
     await page.goto('/stoc-materiale');
-    const addSection = page.locator('.materials-add-section');
+    const addSection = page.getByTestId('materials-add');
     await addSection.getByLabel('Nume material').fill('Carton');
     await addSection.getByLabel('Stoc actual').fill('100');
     await addSection.getByLabel('Stoc minim').fill('20');
@@ -57,7 +61,7 @@ test.describe('Feature 008 — Materials stock & recipes', () => {
   test('US1: navbar link reaches the page', async ({ page }) => {
     await page.goto('/');
     await page.getByRole('link', { name: 'Stoc Materiale' }).click();
-    await expect(page.locator('.materials-title')).toHaveText('Stoc Materiale');
+    await expect(page.getByRole('heading', { name: 'Stoc Materiale' })).toBeVisible();
   });
 
   test('US2: define a recipe and it reappears after reload', async ({ page, request }) => {
@@ -66,47 +70,48 @@ test.describe('Feature 008 — Materials stock & recipes', () => {
     const { template } = await createTemplate(request, 'Invitație');
 
     await page.goto('/catalog');
-    const item = page.locator('.catalog-item', { has: page.locator('.catalog-item-name', { hasText: 'Invitație' }) });
+    const item = catalogItem(page, 'Invitație');
     await item.getByRole('button', { name: 'Rețetă' }).click();
 
     // Add first line: Carton @ 1
     await item.getByRole('button', { name: '+ Adaugă material' }).click();
-    await item.locator('.recipe-line').nth(0).getByLabel('Consum per bucată').fill('1');
-    // Add second line: select Satin @ 0.2
+    await item.getByTestId('recipe-line').nth(0).getByLabel('Consum per bucată').fill('1');
+    // Add second line: select Satin @ 0.2 (Radix Select: open trigger, pick option)
     await item.getByRole('button', { name: '+ Adaugă material' }).click();
-    await item.locator('.recipe-line').nth(1).getByLabel('Material').selectOption({ label: 'Satin' });
-    await item.locator('.recipe-line').nth(1).getByLabel('Consum per bucată').fill('0.2');
+    await item.getByTestId('recipe-line').nth(1).getByLabel('Material').click();
+    await page.getByRole('option', { name: 'Satin' }).click();
+    await item.getByTestId('recipe-line').nth(1).getByLabel('Consum per bucată').fill('0.2');
     await item.getByRole('button', { name: 'Salvează rețeta' }).click();
     await expect(item.getByText('Rețetă salvată.')).toBeVisible();
 
     // Reload, reopen → two lines persist
     await page.reload();
-    const item2 = page.locator('.catalog-item', { has: page.locator('.catalog-item-name', { hasText: 'Invitație' }) });
+    const item2 = catalogItem(page, 'Invitație');
     await item2.getByRole('button', { name: 'Rețetă' }).click();
-    await expect(item2.locator('.recipe-line')).toHaveCount(2);
+    await expect(item2.getByTestId('recipe-line')).toHaveCount(2);
   });
 
   test('US3: low-stock alert appears strictly below minimum and clears at/above', async ({ page, request }) => {
     await createMaterial(request, { name: 'Carton', currentStock: 100, minStock: 20, unit: 'foi' });
 
     await page.goto('/stoc-materiale');
-    await expect(page.locator('.materials-alert')).toHaveCount(0);
+    await expect(page.getByTestId('materials-alert')).toHaveCount(0);
 
     // Edit current stock below minimum → alert appears.
     // (In edit mode the row's name span is replaced by the form, so scope the
-    // edit form to the list rather than to the name-based row locator.)
+    // edit fields to the editing row rather than to a name-based locator.)
     await materialRow(page, 'Carton').getByRole('button', { name: 'Editează' }).click();
-    const editForm = page.locator('.materials-list .material-form');
-    await editForm.getByLabel('Stoc actual').fill('10');
-    await editForm.getByRole('button', { name: 'Salvează' }).click();
-    await expect(page.locator('.materials-alert')).toContainText('Carton');
+    const editRow = page.getByTestId('material-row');
+    await editRow.getByLabel('Stoc actual').fill('10');
+    await editRow.getByRole('button', { name: 'Salvează' }).click();
+    await expect(page.getByTestId('materials-alert')).toContainText('Carton');
 
     // Raise to exactly the minimum → no alert (strict below only)
     await materialRow(page, 'Carton').getByRole('button', { name: 'Editează' }).click();
-    const editForm2 = page.locator('.materials-list .material-form');
-    await editForm2.getByLabel('Stoc actual').fill('20');
-    await editForm2.getByRole('button', { name: 'Salvează' }).click();
-    await expect(page.locator('.materials-alert')).toHaveCount(0);
+    const editRow2 = page.getByTestId('material-row');
+    await editRow2.getByLabel('Stoc actual').fill('20');
+    await editRow2.getByRole('button', { name: 'Salvează' }).click();
+    await expect(page.getByTestId('materials-alert')).toHaveCount(0);
   });
 
   test('US4: completing an order deducts stock once and is not restored on delete', async ({ page, request }) => {

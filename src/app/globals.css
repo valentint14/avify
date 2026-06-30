@@ -1,76 +1,106 @@
-/* ── Design Tokens ──────────────────────────────────────────── */
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/* ─────────────────────────────────────────────────────────────
+   Avify global stylesheet (Tailwind CSS v4 + shadcn/ui tokens)
+   This is the ONLY stylesheet in the app. All component styling
+   is expressed via Tailwind utilities + the shared @/components/ui.
+   Light theme only (dark mode out of scope for this migration).
+   ───────────────────────────────────────────────────────────── */
+
 :root {
-  /* Status colors */
-  --color-finalizata: #166534;
-  --color-finalizata-bg: #dcfce7;
-  --color-in-progres: #1e40af;
-  --color-in-progres-bg: #dbeafe;
-  --color-danger: #dc2626;
-  --color-warn: #d97706;
-  --color-ok: #16a34a;
+  --radius: 0.625rem;
 
-  /* Neutral palette */
-  --color-bg: #f8f9fa;
-  --color-surface: #ffffff;
-  --color-border: #dee2e6;
-  --color-border-hover: #adb5bd;
-  --color-text: #212529;
-  --color-text-muted: #6c757d;
-  --color-overlay: rgba(0, 0, 0, 0.45);
+  /* shadcn base palette (light) */
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.141 0.005 285.823);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.141 0.005 285.823);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.141 0.005 285.823);
+  --primary: oklch(0.21 0.006 285.885);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.967 0.001 286.375);
+  --secondary-foreground: oklch(0.21 0.006 285.885);
+  --muted: oklch(0.967 0.001 286.375);
+  --muted-foreground: oklch(0.552 0.016 285.938);
+  --accent: oklch(0.967 0.001 286.375);
+  --accent-foreground: oklch(0.21 0.006 285.885);
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.985 0 0);
+  --border: oklch(0.92 0.004 286.32);
+  --input: oklch(0.92 0.004 286.32);
+  --ring: oklch(0.705 0.015 286.067);
 
-  /* Event type colors */
-  --color-nunta: #7c3aed;
-  --color-botez: #0891b2;
-
-  /* Column header accent */
-  --color-column-header: #1e293b;
-
-  /* Spacing scale */
-  --space-xs: 4px;
-  --space-sm: 8px;
-  --space-md: 16px;
-  --space-lg: 24px;
-  --space-xl: 32px;
-  --space-2xl: 48px;
-
-  /* Typography */
-  --font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-  --font-size-sm: 0.8125rem;
-  --font-size-base: 0.9375rem;
-  --font-size-lg: 1.0625rem;
-  --font-size-xl: 1.25rem;
-  --font-weight-normal: 400;
-  --font-weight-medium: 500;
-  --font-weight-bold: 700;
-
-  /* Radii & shadows */
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
-  --shadow-modal: 0 20px 60px rgba(0, 0, 0, 0.3);
-
-  /* Navbar */
-  --navbar-height: 56px;
-
-  /* Motion */
-  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-  --transition-fast: 130ms;
-  --transition-base: 220ms;
+  /* Avify semantic accents (preserved from the legacy theme).
+     *-fg is the readable foreground on the matching *-bg. */
+  --status-in-progres: #1e40af;
+  --status-in-progres-bg: #dbeafe;
+  --status-finalizata: #166534;
+  --status-finalizata-bg: #dcfce7;
+  --event-nunta: #7c3aed;
+  --event-botez: #0891b2;
+  --accent-active: #166534;
+  --accent-active-bg: #dcfce7;
+  --warn: #d97706;
+  --warn-bg: #fffbeb;
+  --warn-fg: #92400e;
 }
 
-/* ── Shared motion ──────────────────────────────────────────── */
-@keyframes avify-fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+/* Map design tokens to Tailwind's theme so utilities like
+   bg-background, text-foreground, border-border, bg-status-finalizata
+   are generated. */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Avify semantic accents as color utilities */
+  --color-status-in-progres: var(--status-in-progres);
+  --color-status-in-progres-bg: var(--status-in-progres-bg);
+  --color-status-finalizata: var(--status-finalizata);
+  --color-status-finalizata-bg: var(--status-finalizata-bg);
+  --color-event-nunta: var(--event-nunta);
+  --color-event-botez: var(--event-botez);
+  --color-accent-active: var(--accent-active);
+  --color-accent-active-bg: var(--accent-active-bg);
+  --color-warn: var(--warn);
+  --color-warn-bg: var(--warn-bg);
+  --color-warn-fg: var(--warn-fg);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
 }
 
-@keyframes avify-fade-slide-in {
-  from { opacity: 0; transform: translateY(-6px); }
-  to { opacity: 1; transform: translateY(0); }
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  }
 }
 
-/* Honour users who prefer reduced motion: collapse all animation. */
+/* Honour users who prefer reduced motion. */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -80,44 +110,4 @@
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
-}
-
-/* ── Reset ──────────────────────────────────────────────────── */
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-
-*::-webkit-scrollbar {
-  display: none;
-}
-
-html {
-  font-size: 16px;
-}
-
-body {
-  font-family: var(--font-family);
-  font-size: var(--font-size-base);
-  color: var(--color-text);
-  background: var(--color-bg);
-  min-height: 100vh;
-}
-
-button {
-  cursor: pointer;
-  font-family: inherit;
-  font-size: inherit;
-}
-
-input,
-select,
-textarea {
-  font-family: inherit;
-  font-size: inherit;
 }

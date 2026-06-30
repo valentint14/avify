@@ -7,7 +7,6 @@ import OrderFilters from './OrderFilters.js';
 import ProductBoard from './ProductBoard.js';
 import EditOrderModal from './EditOrderModal.js';
 import { filterOrders, deriveOptions, DEFAULT_FILTERS } from '../lib/orderFilters.js';
-import '../styles/order-list.css';
 
 export default function OrderList({ initialOrders }) {
   const [orders, setOrders] = useState(initialOrders);
@@ -74,7 +73,7 @@ export default function OrderList({ initialOrders }) {
   }, [handleProductChange]);
 
   return (
-    <div className="order-list">
+    <div className="mx-auto flex max-w-6xl flex-col gap-2 p-6">
       <AddOrderForm onOrderAdded={handleOrderAdded} />
       <OrderFilters
         filters={filterState}
@@ -84,15 +83,18 @@ export default function OrderList({ initialOrders }) {
         platformOptions={platformOptions}
       />
       {orders.length === 0 && (
-        <p className="order-list-empty">Nu există comenzi. Adaugă prima comandă.</p>
+        <p className="p-8 text-center text-muted-foreground">Nu există comenzi. Adaugă prima comandă.</p>
       )}
       {orders.length > 0 && filteredOrders.length === 0 && (
-        <p className="order-list-empty" role="status">
+        <p className="p-8 text-center text-muted-foreground" role="status" data-testid="orders-empty">
           Nicio comandă găsită pentru filtrele selectate.
         </p>
       )}
       {filteredOrders.map((order) => (
-        <div key={order.id} className="order-item">
+        <div
+          key={order.id}
+          className="rounded-lg border border-border bg-card shadow-sm"
+        >
           <OrderRow
             order={order}
             isExpanded={expandedOrderIds.has(order.id)}

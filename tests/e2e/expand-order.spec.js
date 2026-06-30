@@ -18,7 +18,7 @@ async function createProduct(request, orderId, name) {
 
 // Select the order row by its name text
 function orderRow(page, name) {
-  return page.locator('.order-row', { has: page.locator('.order-row-name', { hasText: name }) });
+  return page.getByTestId('order-row').filter({ hasText: name });
 }
 
 test.describe('US2 — Expand order / mini-board', () => {
@@ -35,13 +35,13 @@ test.describe('US2 — Expand order / mini-board', () => {
     await expect(row).toBeVisible();
     await row.click();
 
-    const board = page.locator('.product-board');
+    const board = page.getByTestId('product-board');
     await expect(board).toBeVisible();
 
-    const columns = page.locator('.product-column');
+    const columns = page.getByTestId('product-column');
     await expect(columns).toHaveCount(6);
 
-    const labels = await columns.locator('.product-column-label').allTextContents();
+    const labels = await columns.getByTestId('product-column-label').allTextContents();
     expect(labels).toEqual([
       'De făcut', 'În Design', 'Validare Client', 'Printare', 'Asamblare', 'Gata',
     ]);
@@ -55,8 +55,8 @@ test.describe('US2 — Expand order / mini-board', () => {
     await page.goto('/');
     await orderRow(page, 'Nunta Products Test').click();
 
-    const deFacutColumn = page.locator('.product-column').first();
-    await expect(deFacutColumn.locator('.product-card')).toHaveCount(2, { timeout: 5000 });
+    const deFacutColumn = page.getByTestId('product-column').first();
+    await expect(deFacutColumn.getByTestId('product-card')).toHaveCount(2, { timeout: 5000 });
   });
 
   test('clicking the same row collapses the board', async ({ page, request }) => {
@@ -65,23 +65,24 @@ test.describe('US2 — Expand order / mini-board', () => {
     await page.goto('/');
     const row = orderRow(page, 'Nunta Collapse Test');
     await row.click();
-    await expect(page.locator('.product-board')).toBeVisible();
+    await expect(page.getByTestId('product-board')).toBeVisible();
 
     await row.click();
-    await expect(page.locator('.product-board')).not.toBeVisible();
+    await expect(page.getByTestId('product-board')).not.toBeVisible();
   });
 
-  test('accordion: only one order expanded at a time', async ({ page, request }) => {
+  test('multiple orders can be expanded at the same time', async ({ page, request }) => {
     await createOrder(request, 'Nunta Accordion Test');
     await createOrder(request, 'Botez Accordion Test');
 
     await page.goto('/');
     await orderRow(page, 'Nunta Accordion Test').click();
-    await expect(page.locator('.product-board')).toHaveCount(1);
+    await expect(page.getByTestId('product-board')).toHaveCount(1);
 
+    // Expanding a second order keeps the first open (multi-expand).
     await orderRow(page, 'Botez Accordion Test').click();
-    await expect(page.locator('.product-board')).toHaveCount(1);
-    await expect(page.locator('.order-row--expanded')).toHaveCount(1);
+    await expect(page.getByTestId('product-board')).toHaveCount(2);
+    await expect(page.locator('[aria-expanded="true"]')).toHaveCount(2);
   });
 
   test('empty board shows empty state message in each column', async ({ page, request }) => {
@@ -90,7 +91,7 @@ test.describe('US2 — Expand order / mini-board', () => {
     await page.goto('/');
     await orderRow(page, 'Empty Board Test').click();
 
-    const emptyMessages = page.locator('.product-column-empty');
+    const emptyMessages = page.getByTestId('product-column-empty');
     await expect(emptyMessages).toHaveCount(6);
   });
 });
