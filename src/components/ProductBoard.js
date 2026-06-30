@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { STAGES } from '../lib/constants.js';
 import ProductColumn from './ProductColumn.js';
 import AddProductForm from './AddProductForm.js';
-import '../styles/product-board.css';
 
 export default function ProductBoard({ orderId, onProductChange, refreshKey }) {
   const [products, setProducts] = useState([]);
@@ -42,8 +41,8 @@ export default function ProductBoard({ orderId, onProductChange, refreshKey }) {
   }
 
   return (
-    <div className="product-board" data-testid="product-board">
-      <div className="product-board-columns">
+    <div className="border-t border-border bg-muted/30 p-4 animate-in fade-in slide-in-from-top-1" data-testid="product-board">
+      <div className="flex gap-2 overflow-x-auto pb-2">
         {STAGES.map((stage) => (
           <ProductColumn
             key={stage.id}

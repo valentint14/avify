@@ -27,7 +27,7 @@ async function dragToColumn(page, sourceSelector, targetSelector) {
 }
 
 function orderRow(page, name) {
-  return page.locator('.order-row', { has: page.locator('.order-row-name', { hasText: name }) });
+  return page.getByTestId('order-row').filter({ hasText: name });
 }
 
 test.describe('US3 — DnD for catalog-sourced products', () => {
@@ -49,19 +49,19 @@ test.describe('US3 — DnD for catalog-sourced products', () => {
     await page.goto('/');
     await orderRow(page, 'Nuntă DnD Test').click();
 
-    const deFacutColumn = page.locator('.product-column').nth(0);
-    const inDesignColumn = page.locator('.product-column').nth(1);
+    const deFacutColumn = page.getByTestId('product-column').nth(0);
+    const inDesignColumn = page.getByTestId('product-column').nth(1);
 
-    await expect(deFacutColumn.locator('.product-card')).toHaveCount(1, { timeout: 5000 });
+    await expect(deFacutColumn.getByTestId('product-card')).toHaveCount(1, { timeout: 5000 });
 
-    await dragToColumn(page, '.product-column:nth-child(1) .product-card', '.product-column:nth-child(2)');
+    await dragToColumn(page, '[data-testid="product-column"]:nth-child(1) [data-testid="product-card"]', '[data-testid="product-column"]:nth-child(2)');
 
-    await expect(inDesignColumn.locator('.product-card')).toHaveCount(1, { timeout: 3000 });
-    await expect(deFacutColumn.locator('.product-card')).toHaveCount(0);
+    await expect(inDesignColumn.getByTestId('product-card')).toHaveCount(1, { timeout: 3000 });
+    await expect(deFacutColumn.getByTestId('product-card')).toHaveCount(0);
 
     await page.reload();
     await orderRow(page, 'Nuntă DnD Test').click();
-    await expect(page.locator('.product-column').nth(1).locator('.product-card')).toHaveCount(1, { timeout: 5000 });
-    await expect(page.locator('.product-column').nth(0).locator('.product-card')).toHaveCount(0);
+    await expect(page.getByTestId('product-column').nth(1).getByTestId('product-card')).toHaveCount(1, { timeout: 5000 });
+    await expect(page.getByTestId('product-column').nth(0).getByTestId('product-card')).toHaveCount(0);
   });
 });

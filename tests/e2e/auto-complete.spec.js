@@ -17,12 +17,12 @@ async function createProduct(request, orderId, name) {
 }
 
 function orderRow(page, name) {
-  return page.locator('.order-row', { has: page.locator('.order-row-name', { hasText: name }) });
+  return page.getByTestId('order-row').filter({ hasText: name });
 }
 
 function statusBadge(page, name, type) {
-  return page.locator('.order-row', { has: page.locator('.order-row-name', { hasText: name }) })
-    .locator(`.status-badge--${type}`);
+  return page.getByTestId('order-row').filter({ hasText: name })
+    .locator(`[data-testid="order-status"][data-status="${type}"]`);
 }
 
 async function dragToColumn(page, sourceSelector, targetSelector) {
@@ -52,9 +52,9 @@ test.describe('US4 — Auto-complete order', () => {
     await expect(statusBadge(page, 'Auto Finalizata Test', 'in_progres')).toBeVisible();
 
     await orderRow(page, 'Auto Finalizata Test').click();
-    await expect(page.locator('.product-column').nth(0).locator('.product-card')).toHaveCount(1, { timeout: 5000 });
+    await expect(page.getByTestId('product-column').nth(0).getByTestId('product-card')).toHaveCount(1, { timeout: 5000 });
 
-    await dragToColumn(page, '.product-column:nth-child(1) .product-card', '.product-column:nth-child(6)');
+    await dragToColumn(page, '[data-testid="product-column"]:nth-child(1) [data-testid="product-card"]', '[data-testid="product-column"]:nth-child(6)');
 
     await expect(statusBadge(page, 'Auto Finalizata Test', 'finalizata')).toBeVisible({ timeout: 4000 });
     await expect(statusBadge(page, 'Auto Finalizata Test', 'in_progres')).not.toBeVisible();
@@ -71,9 +71,9 @@ test.describe('US4 — Auto-complete order', () => {
     await expect(statusBadge(page, 'Revert Test Order', 'finalizata')).toBeVisible();
 
     await orderRow(page, 'Revert Test Order').click();
-    await expect(page.locator('.product-column').nth(5).locator('.product-card')).toHaveCount(1, { timeout: 5000 });
+    await expect(page.getByTestId('product-column').nth(5).getByTestId('product-card')).toHaveCount(1, { timeout: 5000 });
 
-    await dragToColumn(page, '.product-column:nth-child(6) .product-card', '.product-column:nth-child(1)');
+    await dragToColumn(page, '[data-testid="product-column"]:nth-child(6) [data-testid="product-card"]', '[data-testid="product-column"]:nth-child(1)');
 
     await expect(statusBadge(page, 'Revert Test Order', 'in_progres')).toBeVisible({ timeout: 4000 });
     await expect(statusBadge(page, 'Revert Test Order', 'finalizata')).not.toBeVisible();
@@ -86,17 +86,17 @@ test.describe('US4 — Auto-complete order', () => {
 
     await page.goto('/');
     await orderRow(page, 'Multi Gata Test').click();
-    await expect(page.locator('.product-column').nth(0).locator('.product-card')).toHaveCount(2, { timeout: 5000 });
+    await expect(page.getByTestId('product-column').nth(0).getByTestId('product-card')).toHaveCount(2, { timeout: 5000 });
 
     // Move first product to Gata
-    await dragToColumn(page, '.product-column:nth-child(1) .product-card:first-child', '.product-column:nth-child(6)');
+    await dragToColumn(page, '[data-testid="product-column"]:nth-child(1) [data-testid="product-card"]', '[data-testid="product-column"]:nth-child(6)');
     await page.waitForTimeout(500);
 
     // Still in_progres
     await expect(statusBadge(page, 'Multi Gata Test', 'in_progres')).toBeVisible();
 
     // Move second product to Gata
-    await dragToColumn(page, '.product-column:nth-child(1) .product-card:first-child', '.product-column:nth-child(6)');
+    await dragToColumn(page, '[data-testid="product-column"]:nth-child(1) [data-testid="product-card"]', '[data-testid="product-column"]:nth-child(6)');
 
     await expect(statusBadge(page, 'Multi Gata Test', 'finalizata')).toBeVisible({ timeout: 4000 });
   });

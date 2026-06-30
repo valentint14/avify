@@ -1,6 +1,5 @@
 import './globals.css';
 import '../styles/form.css';
-import '../styles/navbar.css';
 import Navbar from '../components/Navbar.js';
 
 export const metadata = {

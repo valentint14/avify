@@ -15,6 +15,12 @@ function orderRow(page, name) {
   return page.getByTestId('order-row').filter({ hasText: name });
 }
 
+// Pick an option from a shadcn (Radix) Select identified by its trigger testid.
+async function selectOption(page, triggerTestId, optionName) {
+  await page.getByTestId(triggerTestId).click();
+  await page.getByRole('option', { name: optionName, exact: true }).click();
+}
+
 // Seed a fixed set of orders with varied filterable fields.
 async function seed(request) {
   await createOrder(request, 'Nuntă Maria', {
@@ -68,47 +74,47 @@ test.describe('Feature 007 — Order filters', () => {
 
   test('Scenario 2: county dropdown filters and resets', async ({ page }) => {
     await page.goto('/');
-    await page.selectOption('#filter-county', 'Cluj');
+    await selectOption(page, 'filter-county', 'Cluj');
     await expect(page.getByTestId('order-row')).toHaveCount(2);
     await expect(orderRow(page, 'Botez Ion')).toHaveCount(0);
 
-    await page.selectOption('#filter-county', '');
+    await selectOption(page, 'filter-county', 'Toate județele');
     await expect(page.getByTestId('order-row')).toHaveCount(3);
   });
 
   test('Scenario 3: platform dropdown filters and resets', async ({ page }) => {
     await page.goto('/');
-    await page.selectOption('#filter-platform', 'Instagram');
+    await selectOption(page, 'filter-platform', 'Instagram');
     await expect(page.getByTestId('order-row')).toHaveCount(1);
     await expect(orderRow(page, 'Botez Ion')).toBeVisible();
 
-    await page.selectOption('#filter-platform', '');
+    await selectOption(page, 'filter-platform', 'Toate platformele');
     await expect(page.getByTestId('order-row')).toHaveCount(3);
   });
 
   test('Scenario 4: collection status filter', async ({ page }) => {
     await page.goto('/');
-    await page.selectOption('#filter-collected', 'true');
+    await selectOption(page, 'filter-collected', 'Încasată');
     await expect(page.getByTestId('order-row')).toHaveCount(2);
 
-    await page.selectOption('#filter-collected', 'false');
+    await selectOption(page, 'filter-collected', 'Neîncasată');
     await expect(page.getByTestId('order-row')).toHaveCount(1);
     await expect(orderRow(page, 'Botez Ion')).toBeVisible();
 
-    await page.selectOption('#filter-collected', '');
+    await selectOption(page, 'filter-collected', 'Toate');
     await expect(page.getByTestId('order-row')).toHaveCount(3);
   });
 
   test('Scenario 5: delivery status filter', async ({ page }) => {
     await page.goto('/');
-    await page.selectOption('#filter-delivered', 'true');
+    await selectOption(page, 'filter-delivered', 'Livrată');
     await expect(page.getByTestId('order-row')).toHaveCount(2);
 
-    await page.selectOption('#filter-delivered', 'false');
+    await selectOption(page, 'filter-delivered', 'Nelivrată');
     await expect(page.getByTestId('order-row')).toHaveCount(1);
     await expect(orderRow(page, 'Nuntă Maria')).toBeVisible();
 
-    await page.selectOption('#filter-delivered', '');
+    await selectOption(page, 'filter-delivered', 'Toate');
     await expect(page.getByTestId('order-row')).toHaveCount(3);
   });
 
@@ -119,9 +125,9 @@ test.describe('Feature 007 — Order filters', () => {
     await expect(page.getByTestId('filter-reset')).toHaveCount(0);
 
     await page.fill('#filter-client', 'maria');
-    await page.selectOption('#filter-county', 'Cluj');
-    await page.selectOption('#filter-collected', 'true');
-    await page.selectOption('#filter-delivered', 'true');
+    await selectOption(page, 'filter-county', 'Cluj');
+    await selectOption(page, 'filter-collected', 'Încasată');
+    await selectOption(page, 'filter-delivered', 'Livrată');
     // Only "Cununie Ana" (Ana Maria) matches all four
     await expect(page.getByTestId('order-row')).toHaveCount(1);
     await expect(orderRow(page, 'Cununie Ana')).toBeVisible();
@@ -130,7 +136,7 @@ test.describe('Feature 007 — Order filters', () => {
     await page.getByTestId('filter-reset').click();
     await expect(page.getByTestId('order-row')).toHaveCount(3);
     await expect(page.locator('#filter-client')).toHaveValue('');
-    await expect(page.locator('#filter-county')).toHaveValue('');
+    await expect(page.getByTestId('filter-county')).toContainText('Toate');
     await expect(page.getByTestId('filter-reset')).toHaveCount(0);
   });
 });

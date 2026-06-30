@@ -66,16 +66,16 @@ description: "Task list for feature: Migration to shadcn/ui + Tailwind CSS v4"
 
 > Each component task: swap markup to `@/components/ui/*` + Tailwind utilities, preserve all props/state/handlers and `data-testid`s, remove the `../styles/*.css` import. `OrderFilters.js`/`OrderList.js` etc. keep their existing logic untouched.
 
-- [ ] T014 [P] [US2] Migrate `src/components/Navbar.js` to utility-styled nav (links, active state, `aria-current`); then delete `src/styles/navbar.css`
-- [ ] T015 [P] [US2] Migrate `src/components/AddOrderForm.js` to `Input` + `Button`
-- [ ] T016 [P] [US2] Migrate `src/components/OrderFilters.js` to `Input` + `Select` + `Button` (5 filter dimensions + reset, dynamic options preserved)
-- [ ] T017 [US2] Migrate `src/components/OrderRow.js` to `Card`/utilities, `Badge` (status + collected/delivered via T009 variants), `Button` for edit
-- [ ] T018 [US2] Migrate `src/components/OrderList.js` to `Card` + `Collapsible` per order (preserve multi-expand `Set`, filtered list, empty states)
+- [X] T014 [P] [US2] Migrate `src/components/Navbar.js` to utility-styled nav (links, active state, `aria-current`); then delete `src/styles/navbar.css`
+- [X] T015 [P] [US2] Migrate `src/components/AddOrderForm.js` to `Input` + `Button`
+- [X] T016 [P] [US2] Migrate `src/components/OrderFilters.js` to `Input` + `Select` + `Button` (5 filter dimensions + reset, dynamic options preserved)
+- [X] T017 [US2] Migrate `src/components/OrderRow.js` to `Card`/utilities, `Badge` (status + collected/delivered via T009 variants), `Button` for edit
+- [X] T018 [US2] Migrate `src/components/OrderList.js` to `Card` + `Collapsible` per order (preserve multi-expand `Set`, filtered list, empty states)
 - [ ] T019 [US3] Migrate `src/components/EditOrderModal.js` to `Dialog` (focus trap/restore, Esc) with form components; convert the inline "Șterge comanda" two-step confirm to `AlertDialog`; preserve live total + all fields
-- [ ] T020 [US3] Migrate `src/components/ProductDetailsModal.js` to `Dialog`
-- [ ] T021 [US3] Migrate `src/components/ProductCard.js` to `Card`/`Badge`; convert delete confirm to `AlertDialog`; **keep native drag handlers and details-open behavior**
-- [ ] T022 [P] [US2] Migrate `src/components/ProductColumn.js` to utilities/`Card` (keep drop target + drag-over state)
-- [ ] T023 [US2] Migrate `src/components/ProductBoard.js` to `Card`/utilities (columns layout); **DnD handlers unchanged**; then delete `src/styles/product-board.css` (after T021, T022, T023)
+- [X] T020 [US3] Migrate `src/components/ProductDetailsModal.js` to `Dialog`
+- [X] T021 [US3] Migrate `src/components/ProductCard.js` to `Card`/`Badge`; convert delete confirm to `AlertDialog`; **keep native drag handlers and details-open behavior**
+- [X] T022 [P] [US2] Migrate `src/components/ProductColumn.js` to utilities/`Card` (keep drop target + drag-over state)
+- [X] T023 [US2] Migrate `src/components/ProductBoard.js` to `Card`/utilities (columns layout); **DnD handlers unchanged**; then delete `src/styles/product-board.css` (after T021, T022, T023)
 - [ ] T024 [US3] Delete `src/styles/product-modal.css` once `EditOrderModal`, `ProductDetailsModal`, `ProductCard` confirm are all on Dialog/AlertDialog (after T019, T020, T021)
 - [ ] T025 [P] [US2] Migrate `src/components/AddProductForm.js` to `Input`/`Select`/`Button` (catalog + manual modes preserved)
 - [ ] T026 [P] [US2] Migrate `src/components/CatalogSelector.js` to `Checkbox` list (or `Command`+`Popover`), preserving multi-select behavior

@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import '../styles/form.css';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
 export default function AddOrderForm({ onOrderAdded }) {
   const [name, setName] = useState('');
@@ -38,9 +39,9 @@ export default function AddOrderForm({ onOrderAdded }) {
   }
 
   return (
-    <form className="add-form" onSubmit={handleSubmit} noValidate>
-      <input
-        className="add-form-input"
+    <form className="mb-2 flex flex-wrap items-center gap-2" onSubmit={handleSubmit} noValidate>
+      <Input
+        className="min-w-[200px] flex-1"
         data-testid="add-order-input"
         type="text"
         placeholder="Numele comenzii…"
@@ -49,10 +50,14 @@ export default function AddOrderForm({ onOrderAdded }) {
         disabled={submitting}
         aria-label="Numele comenzii"
       />
-      <button className="add-form-btn" data-testid="add-order-submit" type="submit" disabled={submitting} style={{ flexShrink: 0 }}>
+      <Button type="submit" disabled={submitting} data-testid="add-order-submit" className="shrink-0">
         {submitting ? 'Se adaugă…' : 'Adaugă comandă'}
-      </button>
-      {error && <span className="add-form-error" data-testid="add-order-error">{error}</span>}
+      </Button>
+      {error && (
+        <span className="w-full text-sm text-destructive" data-testid="add-order-error">
+          {error}
+        </span>
+      )}
     </form>
   );
 }

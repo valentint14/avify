@@ -8,21 +8,25 @@ async function clearOrders(request) {
 
 const NAV = 'nav[aria-label="Navigare principală"]';
 
+function navLink(page, name) {
+  return page.locator(NAV).getByRole('link', { name });
+}
+
 test.describe('Navbar — US1: navigate between pages', () => {
   test('navbar renders on load with brand and both links', async ({ page }) => {
     await page.goto('/');
     await expect(page.locator(NAV)).toBeVisible();
-    await expect(page.locator('.navbar-brand')).toHaveText('Avify');
-    await expect(page.locator('.navbar-link', { hasText: 'Comenzi' })).toBeVisible();
-    await expect(page.locator('.navbar-link', { hasText: 'Catalog Produse' })).toBeVisible();
+    await expect(page.locator(NAV).getByText('Avify')).toBeVisible();
+    await expect(navLink(page, 'Comenzi')).toBeVisible();
+    await expect(navLink(page, 'Catalog Produse')).toBeVisible();
   });
 
   test('clicking Catalog Produse navigates to /catalog and Comenzi navigates back', async ({ page }) => {
     await page.goto('/');
-    await page.locator('.navbar-link', { hasText: 'Catalog Produse' }).click();
+    await navLink(page, 'Catalog Produse').click();
     await expect(page).toHaveURL('/catalog');
 
-    await page.locator('.navbar-link', { hasText: 'Comenzi' }).click();
+    await navLink(page, 'Comenzi').click();
     await expect(page).toHaveURL('/');
   });
 });
@@ -30,22 +34,14 @@ test.describe('Navbar — US1: navigate between pages', () => {
 test.describe('Navbar — US2: active page highlight', () => {
   test('on "/" the Comenzi link is active and Catalog Produse is not', async ({ page }) => {
     await page.goto('/');
-    const comenzi = page.locator('.navbar-link', { hasText: 'Comenzi' });
-    const catalog = page.locator('.navbar-link', { hasText: 'Catalog Produse' });
-
-    await expect(comenzi).toHaveClass(/navbar-link--active/);
-    await expect(comenzi).toHaveAttribute('aria-current', 'page');
-    await expect(catalog).not.toHaveClass(/navbar-link--active/);
+    await expect(navLink(page, 'Comenzi')).toHaveAttribute('aria-current', 'page');
+    await expect(navLink(page, 'Catalog Produse')).not.toHaveAttribute('aria-current', 'page');
   });
 
   test('on "/catalog" the Catalog Produse link is active and Comenzi is not', async ({ page }) => {
     await page.goto('/catalog');
-    const comenzi = page.locator('.navbar-link', { hasText: 'Comenzi' });
-    const catalog = page.locator('.navbar-link', { hasText: 'Catalog Produse' });
-
-    await expect(catalog).toHaveClass(/navbar-link--active/);
-    await expect(catalog).toHaveAttribute('aria-current', 'page');
-    await expect(comenzi).not.toHaveClass(/navbar-link--active/);
+    await expect(navLink(page, 'Catalog Produse')).toHaveAttribute('aria-current', 'page');
+    await expect(navLink(page, 'Comenzi')).not.toHaveAttribute('aria-current', 'page');
   });
 });
 
@@ -71,7 +67,7 @@ test.describe('Navbar — US3: persistent visibility on scroll', () => {
     expect(top).toBeLessThanOrEqual(1);
 
     // And still be usable while scrolled.
-    await page.locator('.navbar-link', { hasText: 'Catalog Produse' }).click();
+    await navLink(page, 'Catalog Produse').click();
     await expect(page).toHaveURL('/catalog');
   });
 });
@@ -81,6 +77,6 @@ test.describe('Navbar — edge case: unknown route', () => {
     const res = await page.goto('/this-route-does-not-exist');
     // Next.js returns 404 but still renders the root layout (and navbar).
     expect(res.status()).toBe(404);
-    await expect(page.locator('.navbar-link--active')).toHaveCount(0);
+    await expect(page.locator(`${NAV} [aria-current="page"]`)).toHaveCount(0);
   });
 });

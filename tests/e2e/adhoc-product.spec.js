@@ -13,7 +13,7 @@ async function clearOrders(request) {
 }
 
 function orderRow(page, name) {
-  return page.locator('.order-row', { has: page.locator('.order-row-name', { hasText: name }) });
+  return page.getByTestId('order-row').filter({ hasText: name });
 }
 
 test.describe('US4 — Ad-hoc manual product entry', () => {
@@ -27,7 +27,7 @@ test.describe('US4 — Ad-hoc manual product entry', () => {
     await page.goto('/');
     await orderRow(page, 'Manual Mode Test').click();
 
-    await expect(page.locator('.product-board')).toBeVisible();
+    await expect(page.getByTestId('product-board')).toBeVisible();
     await expect(page.locator('.mode-toggle-btn--active', { hasText: 'Scrie manual' })).toBeVisible();
     await expect(page.locator('.add-product-form .add-form-input')).toBeVisible();
   });
@@ -37,11 +37,11 @@ test.describe('US4 — Ad-hoc manual product entry', () => {
     await page.goto('/');
     await orderRow(page, 'Adhoc Order').click();
 
-    await expect(page.locator('.product-board')).toBeVisible();
+    await expect(page.getByTestId('product-board')).toBeVisible();
     await page.locator('.add-product-form .add-form-input').fill('Produs unicat special');
     await page.locator('.add-product-form .add-form-btn').click();
 
-    const deFacutColumn = page.locator('.product-column').first();
+    const deFacutColumn = page.getByTestId('product-column').first();
     await expect(deFacutColumn.locator('.product-card', { hasText: 'Produs unicat special' })).toBeVisible({ timeout: 3000 });
   });
 
@@ -70,8 +70,8 @@ test.describe('US4 — Ad-hoc manual product entry', () => {
     await page.goto('/');
     await orderRow(page, 'Order With Catalog Product').click();
 
-    await expect(page.locator('.product-board')).toBeVisible();
-    const deFacutColumn = page.locator('.product-column').first();
+    await expect(page.getByTestId('product-board')).toBeVisible();
+    const deFacutColumn = page.getByTestId('product-column').first();
     await expect(deFacutColumn.locator('.product-card', { hasText: 'Place card Delete Test' })).toBeVisible({ timeout: 3000 });
   });
 
@@ -80,7 +80,7 @@ test.describe('US4 — Ad-hoc manual product entry', () => {
     await page.goto('/');
     await orderRow(page, 'Validation Order').click();
 
-    await expect(page.locator('.product-board')).toBeVisible();
+    await expect(page.getByTestId('product-board')).toBeVisible();
     await page.locator('.add-product-form .add-form-btn').click();
     await expect(page.locator('.add-product-form .add-form-error')).toBeVisible({ timeout: 2000 });
   });
