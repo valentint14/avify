@@ -1,7 +1,15 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import '../styles/recipe.css';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from '@/components/ui/select';
 
 export default function RecipeEditor({ templateId }) {
   const [materials, setMaterials] = useState([]);
@@ -83,42 +91,48 @@ export default function RecipeEditor({ templateId }) {
     }
   }
 
-  if (loading) return <div className="recipe-editor"><p className="recipe-editor-empty">Se încarcă…</p></div>;
+  if (loading) {
+    return (
+      <div className="mt-2 border-t border-border p-4">
+        <p className="text-sm text-muted-foreground">Se încarcă…</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="recipe-editor">
-      <span className="recipe-editor-title">Rețetă (consum per bucată)</span>
+    <div className="mt-2 flex flex-col gap-2 border-t border-border p-4">
+      <span className="text-sm font-medium text-muted-foreground">Rețetă (consum per bucată)</span>
 
       {materials.length === 0 && (
-        <p className="recipe-editor-empty">
+        <p className="text-sm text-muted-foreground">
           Nu există materiale. Adaugă materiale în pagina „Stoc Materiale&rdquo; mai întâi.
         </p>
       )}
 
       {lines.length === 0 && materials.length > 0 && (
-        <p className="recipe-editor-empty">Nicio linie de rețetă. Adaugă un material.</p>
+        <p className="text-sm text-muted-foreground">Nicio linie de rețetă. Adaugă un material.</p>
       )}
 
       {lines.map((line, index) => {
-        // Options: this line's current material + any not used by other lines
-        const selectable = materials.filter(
-          (m) => m.id === line.materialId || !usedIds.has(m.id)
-        );
+        const selectable = materials.filter((m) => m.id === line.materialId || !usedIds.has(m.id));
         return (
-          <div key={index} className="recipe-line" data-testid="recipe-line">
-            <select
-              className="recipe-line-select"
+          <div key={index} className="flex flex-wrap items-center gap-2" data-testid="recipe-line">
+            <Select
               value={line.materialId}
-              onChange={(e) => setLine(index, 'materialId', e.target.value)}
+              onValueChange={(v) => setLine(index, 'materialId', v)}
               disabled={saving}
-              aria-label="Material"
             >
-              {selectable.map((m) => (
-                <option key={m.id} value={m.id}>{m.name}</option>
-              ))}
-            </select>
-            <input
-              className="recipe-line-qty"
+              <SelectTrigger className="min-w-[160px] flex-1" aria-label="Material">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {selectable.map((m) => (
+                  <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Input
+              className="w-28"
               type="number"
               min="0"
               step="0.01"
@@ -128,41 +142,32 @@ export default function RecipeEditor({ templateId }) {
               disabled={saving}
               aria-label="Consum per bucată"
             />
-            <span className="recipe-line-unit">{unitFor(line.materialId)}</span>
-            <button
-              className="recipe-line-remove"
+            <span className="min-w-8 text-sm text-muted-foreground">{unitFor(line.materialId)}</span>
+            <Button
               type="button"
+              variant="ghost"
+              size="icon"
               onClick={() => removeLine(index)}
               disabled={saving}
               aria-label="Elimină linia"
             >
               ×
-            </button>
+            </Button>
           </div>
         );
       })}
 
-      <div className="recipe-editor-actions">
-        <button
-          className="recipe-editor-btn"
-          type="button"
-          onClick={addLine}
-          disabled={saving || availableToAdd.length === 0}
-        >
+      <div className="mt-1 flex gap-2">
+        <Button type="button" variant="outline" size="sm" onClick={addLine} disabled={saving || availableToAdd.length === 0}>
           + Adaugă material
-        </button>
-        <button
-          className="recipe-editor-btn recipe-editor-btn--primary"
-          type="button"
-          onClick={handleSave}
-          disabled={saving}
-        >
+        </Button>
+        <Button type="button" size="sm" onClick={handleSave} disabled={saving}>
           {saving ? 'Se salvează…' : 'Salvează rețeta'}
-        </button>
+        </Button>
       </div>
 
-      {error && <span className="recipe-editor-error">{error}</span>}
-      {savedMsg && <span className="recipe-editor-title">{savedMsg}</span>}
+      {error && <span className="text-sm text-destructive">{error}</span>}
+      {savedMsg && <span className="text-sm font-medium text-muted-foreground">{savedMsg}</span>}
     </div>
   );
 }

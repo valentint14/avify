@@ -79,11 +79,11 @@ description: "Task list for feature: Migration to shadcn/ui + Tailwind CSS v4"
 - [ ] T024 [US3] Delete `src/styles/product-modal.css` once `EditOrderModal`, `ProductDetailsModal`, `ProductCard` confirm are all on Dialog/AlertDialog (after T019, T020, T021)
 - [ ] T025 [P] [US2] Migrate `src/components/AddProductForm.js` to `Input`/`Select`/`Button` (catalog + manual modes preserved)
 - [ ] T026 [P] [US2] Migrate `src/components/CatalogSelector.js` to `Checkbox` list (or `Command`+`Popover`), preserving multi-select behavior
-- [ ] T027 [US2] Migrate `src/components/CatalogProductForm.js` to `Input`/`Button`
-- [ ] T028 [US2] Migrate `src/components/RecipeEditor.js` to `Select`/`Input`/`Button` (lines add/remove, dedupe, qty validation, save) ; then delete `src/styles/recipe.css`
+- [X] T027 [US2] Migrate `src/components/CatalogProductForm.js` to `Input`/`Button`
+- [X] T028 [US2] Migrate `src/components/RecipeEditor.js` to `Select`/`Input`/`Button` (lines add/remove, dedupe, qty validation, save) ; then delete `src/styles/recipe.css`
 - [ ] T029 [US2] Migrate `src/components/CatalogPage.js` to `Card`/`Button`; convert delete confirm to `AlertDialog`; then delete `src/styles/catalog.css` (after T027, T028, T026, T029)
-- [ ] T030 [P] [US2] Migrate `src/components/MaterialForm.js` to `Input`/`Button`
-- [ ] T031 [US2] Migrate `src/components/MaterialsPage.js` to `Card`/`Button`/`Badge` (low-stock alert as Card+`warn` Badge); convert delete confirm to `AlertDialog`; then delete `src/styles/materials.css` (after T030, T031)
+- [X] T030 [P] [US2] Migrate `src/components/MaterialForm.js` to `Input`/`Button`
+- [X] T031 [US2] Migrate `src/components/MaterialsPage.js` to `Card`/`Button`/`Badge` (low-stock alert as Card+`warn` Badge); convert delete confirm to `AlertDialog`; then delete `src/styles/materials.css` (after T030, T031)
 - [ ] T032 [US2] Migrate the remaining form-level controls and delete `src/styles/form.css` and `src/styles/order-list.css` and `src/styles/order-filters.css` once their last consumers (T015–T018, T025, T027, T030) are converted — verify nothing imports `../styles/*.css` anymore
 
 **Checkpoint**: Every surface uses shared components; all 9 legacy stylesheets deleted; only `globals.css` remains. Accessibility (dialog focus trap, keyboard nav) holds via Radix.

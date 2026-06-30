@@ -3,12 +3,24 @@
 import { useState, useMemo } from 'react';
 import MaterialForm from './MaterialForm.js';
 import { lowStockMaterials, isLowStock } from '../lib/lowStock.js';
-import '../styles/materials.css';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { cn } from '@/lib/utils';
 
 export default function MaterialsPage({ initialMaterials }) {
   const [materials, setMaterials] = useState(initialMaterials);
   const [editingId, setEditingId] = useState(null);
-  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
   const [error, setError] = useState('');
 
   const lowStock = useMemo(() => lowStockMaterials(materials), [materials]);
@@ -57,22 +69,25 @@ export default function MaterialsPage({ initialMaterials }) {
       return;
     }
     setMaterials((prev) => prev.filter((m) => m.id !== id));
-    setConfirmDeleteId(null);
   }
 
   return (
-    <div className="materials-page">
-      <div className="materials-header">
-        <h1 className="materials-title">Stoc Materiale</h1>
-        <p className="materials-subtitle">
+    <div className="mx-auto flex max-w-4xl flex-col gap-4 p-6">
+      <div className="flex flex-col gap-1">
+        <h1 className="text-xl font-bold tracking-tight text-foreground">Stoc Materiale</h1>
+        <p className="text-sm text-muted-foreground">
           Gestionează materiile prime și pragurile minime de stoc.
         </p>
       </div>
 
       {lowStock.length > 0 && (
-        <div className="materials-alert" role="status" data-testid="materials-alert">
-          <span className="materials-alert-title">⚠ Stoc sub minim</span>
-          <ul className="materials-alert-list">
+        <div
+          className="flex flex-col gap-1 rounded-md border border-warn/40 bg-warn-bg p-4 text-warn-fg"
+          role="status"
+          data-testid="materials-alert"
+        >
+          <span className="font-bold">⚠ Stoc sub minim</span>
+          <ul className="list-disc pl-6 text-sm">
             {lowStock.map((m) => (
               <li key={m.id}>
                 {m.name}: {m.currentStock} {m.unit ?? ''} (minim {m.minStock})
@@ -82,20 +97,24 @@ export default function MaterialsPage({ initialMaterials }) {
         </div>
       )}
 
-      <div className="materials-add-section" data-testid="materials-add">
-        <p className="materials-add-title">Adaugă material nou</p>
+      <div className="rounded-lg border border-border bg-card p-4 shadow-sm" data-testid="materials-add">
+        <p className="mb-2 font-medium">Adaugă material nou</p>
         <MaterialForm key="add-form" onSave={handleAdd} submitLabel="Adaugă" />
-        {error && <p className="material-form-error" style={{ marginTop: '8px' }}>{error}</p>}
+        {error && <p className="mt-2 text-sm text-destructive">{error}</p>}
       </div>
 
-      <div className="materials-list" data-testid="materials-list">
+      <div className="flex flex-col gap-1.5" data-testid="materials-list">
         {materials.length === 0 && (
-          <p className="materials-empty">Niciun material. Adaugă primul material de mai sus.</p>
+          <p className="p-8 text-center text-muted-foreground">Niciun material. Adaugă primul material de mai sus.</p>
         )}
 
         {materials.map((m) =>
           editingId === m.id ? (
-            <div key={m.id} className="material-row" data-testid="material-row">
+            <div
+              key={m.id}
+              className="rounded-md border border-border bg-card p-3 shadow-sm"
+              data-testid="material-row"
+            >
               <MaterialForm
                 initialValues={{
                   name: m.name,
@@ -109,47 +128,44 @@ export default function MaterialsPage({ initialMaterials }) {
               />
             </div>
           ) : (
-            <div key={m.id} className={`material-row${isLowStock(m) ? ' material-row--low' : ''}`} data-testid="material-row">
-              <span className="material-row-name">{m.name}</span>
-              <span className="material-row-stock">
+            <div
+              key={m.id}
+              className={cn(
+                'flex items-center gap-4 rounded-md border bg-card p-3 shadow-sm',
+                isLowStock(m) ? 'border-warn' : 'border-border'
+              )}
+              data-testid="material-row"
+            >
+              <span className="flex-1 font-medium text-foreground">{m.name}</span>
+              <span className="whitespace-nowrap text-sm text-muted-foreground">
                 {m.currentStock} {m.unit ?? ''} · minim {m.minStock}
               </span>
-              {isLowStock(m) && <span className="material-row-low-badge">Sub minim</span>}
+              {isLowStock(m) && <Badge variant="warn">Sub minim</Badge>}
 
-              {confirmDeleteId === m.id ? (
-                <div className="material-row-actions">
-                  <button
-                    className="material-row-btn material-row-btn--danger"
-                    onClick={() => handleDelete(m.id)}
-                  >
-                    Confirmă
-                  </button>
-                  <button className="material-row-btn" onClick={() => setConfirmDeleteId(null)}>
-                    Anulează
-                  </button>
-                </div>
-              ) : (
-                <div className="material-row-actions">
-                  <button
-                    className="material-row-btn"
-                    onClick={() => {
-                      setEditingId(m.id);
-                      setConfirmDeleteId(null);
-                    }}
-                  >
-                    Editează
-                  </button>
-                  <button
-                    className="material-row-btn material-row-btn--danger"
-                    onClick={() => {
-                      setConfirmDeleteId(m.id);
-                      setEditingId(null);
-                    }}
-                  >
-                    Șterge
-                  </button>
-                </div>
-              )}
+              <div className="flex shrink-0 gap-1">
+                <Button variant="outline" size="sm" onClick={() => setEditingId(m.id)}>
+                  Editează
+                </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="outline" size="sm" className="text-destructive">
+                      Șterge
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Ștergi „{m.name}”?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Materialul va fi eliminat și scos din rețetele care îl folosesc.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Anulează</AlertDialogCancel>
+                      <AlertDialogAction onClick={() => handleDelete(m.id)}>Șterge</AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
             </div>
           )
         )}

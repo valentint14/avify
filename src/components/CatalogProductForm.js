@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import '../styles/catalog.css';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
 export default function CatalogProductForm({ initialName = '', initialDescription = '', onSave, onCancel, submitLabel = 'Salvează' }) {
   const [name, setName] = useState(initialName);
@@ -26,10 +27,10 @@ export default function CatalogProductForm({ initialName = '', initialDescriptio
   }
 
   return (
-    <form className="catalog-form" onSubmit={handleSubmit} noValidate>
-      <div className="catalog-form-row">
-        <input
-          className="catalog-form-input"
+    <form className="flex flex-col gap-2" onSubmit={handleSubmit} noValidate>
+      <div className="flex flex-wrap items-center gap-2">
+        <Input
+          className="min-w-[200px] flex-1"
           type="text"
           placeholder="Denumire produs *"
           value={name}
@@ -38,22 +39,16 @@ export default function CatalogProductForm({ initialName = '', initialDescriptio
           aria-label="Denumire produs"
           autoFocus
         />
-        <button className="catalog-form-btn" type="submit" disabled={submitting}>
+        <Button type="submit" disabled={submitting}>
           {submitting ? 'Se salvează…' : submitLabel}
-        </button>
+        </Button>
         {onCancel && (
-          <button
-            className="catalog-form-btn catalog-form-btn--secondary"
-            type="button"
-            onClick={onCancel}
-            disabled={submitting}
-          >
+          <Button type="button" variant="secondary" onClick={onCancel} disabled={submitting}>
             Anulează
-          </button>
+          </Button>
         )}
       </div>
-      <input
-        className="catalog-form-desc"
+      <Input
         type="text"
         placeholder="Descriere (opțional)"
         value={description}
@@ -61,7 +56,7 @@ export default function CatalogProductForm({ initialName = '', initialDescriptio
         disabled={submitting}
         aria-label="Descriere produs"
       />
-      {error && <span className="catalog-form-error">{error}</span>}
+      {error && <span className="text-sm text-destructive">{error}</span>}
     </form>
   );
 }

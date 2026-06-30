@@ -76,9 +76,10 @@ test.describe('Feature 008 — Materials stock & recipes', () => {
     // Add first line: Carton @ 1
     await item.getByRole('button', { name: '+ Adaugă material' }).click();
     await item.getByTestId('recipe-line').nth(0).getByLabel('Consum per bucată').fill('1');
-    // Add second line: select Satin @ 0.2
+    // Add second line: select Satin @ 0.2 (Radix Select: open trigger, pick option)
     await item.getByRole('button', { name: '+ Adaugă material' }).click();
-    await item.getByTestId('recipe-line').nth(1).getByLabel('Material').selectOption({ label: 'Satin' });
+    await item.getByTestId('recipe-line').nth(1).getByLabel('Material').click();
+    await page.getByRole('option', { name: 'Satin' }).click();
     await item.getByTestId('recipe-line').nth(1).getByLabel('Consum per bucată').fill('0.2');
     await item.getByRole('button', { name: 'Salvează rețeta' }).click();
     await expect(item.getByText('Rețetă salvată.')).toBeVisible();
