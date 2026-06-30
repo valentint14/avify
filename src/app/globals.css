@@ -100,66 +100,7 @@
   }
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   TRANSITIONAL legacy tokens — TEMPORARY.
-   The not-yet-migrated bespoke stylesheets (src/styles/*.css) still
-   reference these variables. They are kept ONLY so the app stays
-   functional during the incremental migration and MUST be removed in
-   Phase 5 once every legacy stylesheet is deleted. Do not reference
-   these from new shadcn-based code.
-   ═══════════════════════════════════════════════════════════════ */
-:root {
-  --space-xs: 4px;
-  --space-sm: 8px;
-  --space-md: 16px;
-  --space-lg: 24px;
-  --space-xl: 32px;
-  --space-2xl: 48px;
-
-  --font-size-sm: 0.8125rem;
-  --font-size-base: 0.9375rem;
-  --font-size-lg: 1.0625rem;
-  --font-size-xl: 1.25rem;
-  --font-weight-normal: 400;
-  --font-weight-medium: 500;
-  --font-weight-bold: 700;
-
-  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
-  --shadow-modal: 0 20px 60px rgba(0, 0, 0, 0.3);
-  --navbar-height: 56px;
-
-  --color-finalizata: #166534;
-  --color-finalizata-bg: #dcfce7;
-  --color-in-progres: #1e40af;
-  --color-in-progres-bg: #dbeafe;
-  --color-danger: #dc2626;
-  --color-warn: #d97706;
-  --color-ok: #16a34a;
-  --color-bg: #f8f9fa;
-  --color-surface: #ffffff;
-  --color-border-hover: #adb5bd;
-  --color-text: #212529;
-  --color-text-muted: #6c757d;
-  --color-overlay: rgba(0, 0, 0, 0.45);
-  --color-nunta: #7c3aed;
-  --color-botez: #0891b2;
-  --color-column-header: #1e293b;
-
-  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-  --transition-fast: 130ms;
-  --transition-base: 220ms;
-}
-
-@keyframes avify-fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes avify-fade-slide-in {
-  from { opacity: 0; transform: translateY(-6px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
+/* Honour users who prefer reduced motion. */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

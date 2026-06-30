@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import '../styles/catalog.css';
 
 export default function CatalogSelector({ mode = 'multi', onSelectionChange, placeholder = 'Caută produse din catalog…', excludedIds = [] }) {
   const [allTemplates, setAllTemplates] = useState([]);
@@ -55,17 +54,21 @@ export default function CatalogSelector({ mode = 'multi', onSelectionChange, pla
   }
 
   return (
-    <div className="catalog-selector" ref={containerRef}>
+    <div className="relative" ref={containerRef}>
       <div
-        className="catalog-selector-field"
+        className="flex min-h-9 flex-wrap items-center gap-1.5 rounded-md border border-input bg-transparent px-2 py-1.5 text-sm focus-within:ring-1 focus-within:ring-ring"
         onClick={() => { setOpen(true); }}
       >
         {mode === 'multi' && selected.map((t, i) => (
-          <span key={`${t.id}-${i}`} className="catalog-chip">
+          <span
+            key={`${t.id}-${i}`}
+            className="inline-flex items-center gap-1 rounded bg-secondary px-2 py-0.5 text-xs text-secondary-foreground"
+            data-testid="catalog-chip"
+          >
             {t.name}
             <button
               type="button"
-              className="catalog-chip-remove"
+              className="leading-none text-muted-foreground hover:text-destructive"
               aria-label={`Elimină ${t.name}`}
               onClick={(e) => { e.stopPropagation(); removeSelected(t.id); }}
             >
@@ -74,7 +77,7 @@ export default function CatalogSelector({ mode = 'multi', onSelectionChange, pla
           </span>
         ))}
         <input
-          className="catalog-selector-input"
+          className="min-w-[120px] flex-1 bg-transparent outline-none placeholder:text-muted-foreground"
           type="text"
           placeholder={selected.length === 0 ? placeholder : 'Selectează mai multe produse…'}
           value={query}
@@ -89,20 +92,21 @@ export default function CatalogSelector({ mode = 'multi', onSelectionChange, pla
       </div>
 
       {open && (
-        <div className="catalog-selector-dropdown">
+        <div className="absolute z-50 mt-1 max-h-60 w-full overflow-y-auto rounded-md border border-border bg-popover p-1 shadow-md" data-testid="catalog-selector-dropdown">
           {allTemplates.length === 0 ? (
-            <div className="catalog-selector-empty">
+            <div className="px-2 py-1.5 text-sm text-muted-foreground">
               Catalogul este gol — accesează{' '}
-              <a href="/catalog">/catalog</a>{' '}
+              <a className="underline" href="/catalog">/catalog</a>{' '}
               pentru a adăuga produse.
             </div>
           ) : filtered.length === 0 ? (
-            <div className="catalog-selector-empty">Niciun produs găsit.</div>
+            <div className="px-2 py-1.5 text-sm text-muted-foreground">Niciun produs găsit.</div>
           ) : (
             filtered.map((t) => (
               <div
                 key={t.id}
-                className="catalog-selector-option"
+                className="cursor-pointer rounded px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground"
+                data-testid="catalog-option"
                 onMouseDown={(e) => {
                   e.preventDefault();
                   selectTemplate(t);

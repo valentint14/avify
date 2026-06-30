@@ -2,8 +2,10 @@
 
 import { useState } from 'react';
 import CatalogSelector from './CatalogSelector.js';
-import '../styles/form.css';
-import '../styles/catalog.css';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 export default function AddProductForm({ orderId, onProductAdded, excludedTemplateIds = [] }) {
   const [mode, setMode] = useState('catalog');
@@ -104,121 +106,90 @@ export default function AddProductForm({ orderId, onProductAdded, excludedTempla
   }
 
   return (
-    <form className="add-form add-product-form" data-testid="add-product-form" onSubmit={handleSubmit} noValidate style={{ flexDirection: 'column', alignItems: 'stretch' }}>
-      <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-        <div className="mode-toggle" style={{ margin: 0 }}>
+    <form className="mt-2 flex flex-col gap-3" data-testid="add-product-form" onSubmit={handleSubmit} noValidate>
+      <div className="flex items-center gap-2">
+        <div className="inline-flex rounded-md border border-border p-0.5">
           <button
             type="button"
-            className={`mode-toggle-btn${mode === 'catalog' ? ' mode-toggle-btn--active' : ''}`}
+            className={cn(
+              'rounded px-3 py-1 text-sm transition-colors',
+              mode === 'catalog' ? 'bg-secondary text-secondary-foreground' : 'text-muted-foreground'
+            )}
             onClick={() => { setMode('catalog'); setError(''); }}
           >
             Din catalog
           </button>
           <button
             type="button"
-            className={`mode-toggle-btn${mode === 'manual' ? ' mode-toggle-btn--active' : ''}`}
+            className={cn(
+              'rounded px-3 py-1 text-sm transition-colors',
+              mode === 'manual' ? 'bg-secondary text-secondary-foreground' : 'text-muted-foreground'
+            )}
             onClick={() => { setMode('manual'); setError(''); }}
           >
             Scrie manual
           </button>
         </div>
-        <button className="add-form-btn" data-testid="add-product-submit" type="submit" disabled={isDisabled} style={{ marginLeft: 'auto', flexShrink: 0 }}>
+        <Button type="submit" disabled={isDisabled} data-testid="add-product-submit" className="ml-auto shrink-0">
           {submitting ? 'Se adaugă…' : 'Adaugă produs'}
-        </button>
+        </Button>
       </div>
 
-      <div style={{ display: mode === 'catalog' ? 'block' : 'none' }}>
-        <div className="manual-details">
-          <CatalogSelector
-            key={selectorKey}
-            mode="multi"
-            onSelectionChange={setSelectedTemplates}
-            placeholder="Selectează din catalog…"
-            excludedIds={excludedTemplateIds}
-          />
-          {selectedTemplates.length > 0 && (
-            <div className="template-details-list">
-              {selectedTemplates.map((tmpl) => {
-                const details = templateDetails[tmpl.id] ?? {};
-                return (
-                  <div key={tmpl.id} className="catalog-product-details">
-                    <span className="manual-details-product-name">{tmpl.name}</span>
-                    <div className="manual-details-fields">
-                      <div className="manual-details-field">
-                        <label className="manual-details-label" htmlFor={`qty-${tmpl.id}`}>Cantitate</label>
-                        <input
-                          id={`qty-${tmpl.id}`}
-                          type="number"
-                          className="template-details-qty"
-                          min="1"
-                          value={details.quantity ?? 1}
-                          onChange={(e) => handleDetailChange(tmpl.id, 'quantity', e.target.value)}
-                          disabled={submitting}
-                        />
-                      </div>
-                      <div className="manual-details-field">
-                        <label className="manual-details-label" htmlFor={`info-${tmpl.id}`}>Informații suplimentare</label>
-                        <textarea
-                          id={`info-${tmpl.id}`}
-                          className="template-details-info"
-                          value={details.additionalInfo ?? ''}
-                          onChange={(e) => handleDetailChange(tmpl.id, 'additionalInfo', e.target.value)}
-                          disabled={submitting}
-                          placeholder="Note personalizare, culori, font…"
-                          rows={2}
-                        />
-                      </div>
+      <div className={mode === 'catalog' ? 'block' : 'hidden'}>
+        <CatalogSelector
+          key={selectorKey}
+          mode="multi"
+          onSelectionChange={setSelectedTemplates}
+          placeholder="Selectează din catalog…"
+          excludedIds={excludedTemplateIds}
+        />
+        {selectedTemplates.length > 0 && (
+          <div className="mt-2 flex flex-col gap-2">
+            {selectedTemplates.map((tmpl) => {
+              const details = templateDetails[tmpl.id] ?? {};
+              return (
+                <div key={tmpl.id} className="rounded-md border border-border p-2">
+                  <span className="text-sm font-medium">{tmpl.name}</span>
+                  <div className="mt-1 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                    <div className="flex flex-col gap-1">
+                      <label className="text-xs text-muted-foreground" htmlFor={`qty-${tmpl.id}`}>Cantitate</label>
+                      <Input id={`qty-${tmpl.id}`} type="number" min="1" value={details.quantity ?? 1} onChange={(e) => handleDetailChange(tmpl.id, 'quantity', e.target.value)} disabled={submitting} />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <label className="text-xs text-muted-foreground" htmlFor={`info-${tmpl.id}`}>Informații suplimentare</label>
+                      <Textarea id={`info-${tmpl.id}`} rows={2} value={details.additionalInfo ?? ''} onChange={(e) => handleDetailChange(tmpl.id, 'additionalInfo', e.target.value)} disabled={submitting} placeholder="Note personalizare, culori, font…" />
                     </div>
                   </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
-      <div style={{ display: mode === 'manual' ? undefined : 'none' }}>
-        <div className="manual-details">
-          <input
-            className="manual-details-name"
-            data-testid="add-product-input"
-            type="text"
-            placeholder="Numele produsului…"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            disabled={submitting}
-            aria-label="Numele produsului"
-          />
-          <div className="manual-details-fields">
-            <div className="manual-details-field">
-              <label className="manual-details-label" htmlFor="manual-qty">Cantitate</label>
-              <input
-                id="manual-qty"
-                type="number"
-                className="template-details-qty"
-                min="1"
-                value={manualQty}
-                onChange={(e) => setManualQty(e.target.value)}
-                disabled={submitting}
-              />
-            </div>
-            <div className="manual-details-field">
-              <label className="manual-details-label" htmlFor="manual-info">Informații suplimentare</label>
-              <textarea
-                id="manual-info"
-                className="template-details-info"
-                value={manualInfo}
-                onChange={(e) => setManualInfo(e.target.value)}
-                disabled={submitting}
-                placeholder="Note personalizare, culori, font…"
-                rows={2}
-              />
-            </div>
+      <div className={mode === 'manual' ? 'block' : 'hidden'}>
+        <Input
+          data-testid="add-product-input"
+          type="text"
+          placeholder="Numele produsului…"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          disabled={submitting}
+          aria-label="Numele produsului"
+        />
+        <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
+          <div className="flex flex-col gap-1">
+            <label className="text-xs text-muted-foreground" htmlFor="manual-qty">Cantitate</label>
+            <Input id="manual-qty" type="number" min="1" value={manualQty} onChange={(e) => setManualQty(e.target.value)} disabled={submitting} />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className="text-xs text-muted-foreground" htmlFor="manual-info">Informații suplimentare</label>
+            <Textarea id="manual-info" rows={2} value={manualInfo} onChange={(e) => setManualInfo(e.target.value)} disabled={submitting} placeholder="Note personalizare, culori, font…" />
           </div>
         </div>
       </div>
 
-      {error && <span className="add-form-error" data-testid="add-product-error">{error}</span>}
+      {error && <span className="text-sm text-destructive" data-testid="add-product-error">{error}</span>}
     </form>
   );
 }

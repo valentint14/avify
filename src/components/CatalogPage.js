@@ -3,13 +3,23 @@
 import { useState } from 'react';
 import CatalogProductForm from './CatalogProductForm.js';
 import RecipeEditor from './RecipeEditor.js';
-import '../styles/catalog.css';
+import { Button } from '@/components/ui/button';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 export default function CatalogPage({ initialTemplates }) {
   const [templates, setTemplates] = useState(initialTemplates);
   const [editingId, setEditingId] = useState(null);
   const [recipeId, setRecipeId] = useState(null);
-  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
   const [error, setError] = useState('');
 
   async function handleAdd({ name, description }) {
@@ -58,39 +68,34 @@ export default function CatalogPage({ initialTemplates }) {
       return;
     }
     setTemplates((prev) => prev.filter((t) => t.id !== id));
-    setConfirmDeleteId(null);
   }
 
   return (
-    <div className="catalog-page">
-      <div className="catalog-header">
-        <h1 className="catalog-title">Catalog Produse</h1>
-        <p className="catalog-subtitle">
+    <div className="mx-auto flex max-w-4xl flex-col gap-4 p-6">
+      <div className="flex flex-col gap-1">
+        <h1 className="text-xl font-bold tracking-tight text-foreground">Catalog Produse</h1>
+        <p className="text-sm text-muted-foreground">
           Gestionează produsele șablon care pot fi selectate la crearea comenzilor.
         </p>
       </div>
 
-      <div className="catalog-add-section">
-        <p className="catalog-add-title">Adaugă produs nou</p>
-        <CatalogProductForm
-          key="add-form"
-          onSave={handleAdd}
-          submitLabel="Adaugă"
-        />
-        {error && <p className="catalog-form-error" style={{ marginTop: '8px' }}>{error}</p>}
+      <div className="rounded-lg border border-border bg-card p-4 shadow-sm" data-testid="catalog-add">
+        <p className="mb-2 font-medium">Adaugă produs nou</p>
+        <CatalogProductForm key="add-form" onSave={handleAdd} submitLabel="Adaugă" />
+        {error && <p className="mt-2 text-sm text-destructive" data-testid="catalog-error">{error}</p>}
       </div>
 
-      <div className="catalog-list">
+      <div className="flex flex-col gap-1.5">
         {templates.length === 0 && (
-          <div className="catalog-empty">
-            <p className="catalog-empty-title">Catalogul este gol</p>
-            <p className="catalog-empty-hint">Adaugă primul produs folosind formularul de mai sus.</p>
+          <div className="rounded-lg border border-dashed border-border p-8 text-center" data-testid="catalog-empty">
+            <p className="font-medium text-foreground">Catalogul este gol</p>
+            <p className="text-sm text-muted-foreground">Adaugă primul produs folosind formularul de mai sus.</p>
           </div>
         )}
 
         {templates.map((t) =>
           editingId === t.id ? (
-            <div key={t.id} className="catalog-item catalog-item--editing">
+            <div key={t.id} className="rounded-md border border-border bg-card p-3 shadow-sm" data-testid="catalog-item">
               <CatalogProductForm
                 initialName={t.name}
                 initialDescription={t.description ?? ''}
@@ -100,68 +105,50 @@ export default function CatalogPage({ initialTemplates }) {
               />
             </div>
           ) : (
-            <div
-              key={t.id}
-              className={`catalog-item${recipeId === t.id ? ' catalog-item--recipe' : ''}`}
-              data-testid="catalog-item"
-            >
-              <div className="catalog-item-row">
-                <div className="catalog-item-info">
-                  <div className="catalog-item-name">{t.name}</div>
-                  {t.description && (
-                    <div className="catalog-item-desc">{t.description}</div>
-                  )}
+            <div key={t.id} className="rounded-md border border-border bg-card shadow-sm" data-testid="catalog-item">
+              <div className="flex items-center gap-4 p-3">
+                <div className="min-w-0 flex-1">
+                  <div className="font-medium text-foreground">{t.name}</div>
+                  {t.description && <div className="text-sm text-muted-foreground">{t.description}</div>}
                 </div>
 
-                {confirmDeleteId === t.id ? (
-                  <div className="catalog-delete-confirm">
-                    <span className="catalog-delete-confirm-text">Ești sigur?</span>
-                    <button
-                      className="catalog-item-btn catalog-item-btn--danger"
-                      onClick={() => handleDelete(t.id)}
-                    >
-                      Confirmă
-                    </button>
-                    <button
-                      className="catalog-item-btn"
-                      onClick={() => setConfirmDeleteId(null)}
-                    >
-                      Anulează
-                    </button>
-                  </div>
-                ) : (
-                  <div className="catalog-item-actions">
-                    <button
-                      className="catalog-item-btn"
-                      onClick={() => {
-                        setRecipeId((prev) => (prev === t.id ? null : t.id));
-                        setEditingId(null);
-                        setConfirmDeleteId(null);
-                      }}
-                    >
-                      {recipeId === t.id ? 'Ascunde rețeta' : 'Rețetă'}
-                    </button>
-                    <button
-                      className="catalog-item-btn"
-                      onClick={() => {
-                        setEditingId(t.id);
-                        setRecipeId(null);
-                        setConfirmDeleteId(null);
-                      }}
-                    >
-                      Editează
-                    </button>
-                    <button
-                      className="catalog-item-btn catalog-item-btn--danger"
-                      onClick={() => {
-                        setConfirmDeleteId(t.id);
-                        setEditingId(null);
-                      }}
-                    >
-                      Șterge
-                    </button>
-                  </div>
-                )}
+                <div className="flex shrink-0 gap-1">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setRecipeId((prev) => (prev === t.id ? null : t.id));
+                      setEditingId(null);
+                    }}
+                  >
+                    {recipeId === t.id ? 'Ascunde rețeta' : 'Rețetă'}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setEditingId(t.id);
+                      setRecipeId(null);
+                    }}
+                  >
+                    Editează
+                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="outline" size="sm" className="text-destructive">Șterge</Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Ștergi „{t.name}”?</AlertDialogTitle>
+                        <AlertDialogDescription>Produsul șablon va fi eliminat din catalog.</AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Anulează</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => handleDelete(t.id)}>Șterge</AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
               </div>
 
               {recipeId === t.id && <RecipeEditor templateId={t.id} />}
