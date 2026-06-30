@@ -14,7 +14,7 @@ export default function Navbar() {
       aria-label="Navigare principală"
     >
       <div className="mx-auto flex h-14 max-w-6xl items-center gap-6 px-4">
-        <span className="text-lg font-bold tracking-tight text-foreground">Avify</span>
+        <span className="text-lg font-bold tracking-tight text-foreground">KRAFTED BY AVIFY</span>
         <ul className="flex items-center gap-1" role="list">
           {NAV_LINKS.map((link) => {
             const active = isLinkActive(pathname, link.href);

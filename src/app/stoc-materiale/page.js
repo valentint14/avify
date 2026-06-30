@@ -1,15 +1,24 @@
+import { Suspense } from 'react';
 import { listAll } from '../../lib/materials.js';
 import MaterialsPage from '../../components/MaterialsPage.js';
+import MaterialsPageSkeleton from '@/components/skeletons/MaterialsPageSkeleton';
 
 export const metadata = {
   title: 'Stoc Materiale — Avify',
 };
 
-// Always render fresh on the server so stock reflects deductions made on
-// other pages (e.g. completing an order) — no stale seed, no flash.
 export const dynamic = 'force-dynamic';
 
 export default function StocMaterialeRoute() {
+  return (
+    <Suspense fallback={<MaterialsPageSkeleton />}>
+      <StocMaterialeData />
+    </Suspense>
+  );
+}
+
+async function StocMaterialeData() {
+  await new Promise((resolve) => setImmediate(resolve));
   const materials = listAll();
   return <MaterialsPage initialMaterials={materials} />;
 }

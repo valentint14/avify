@@ -2,7 +2,7 @@ import './globals.css';
 import Navbar from '../components/Navbar.js';
 
 export const metadata = {
-  title: 'Avify — Comenzi Papetărie',
+  title: 'AVIFY',
   description: 'Managementul comenzilor de papetărie',
 };
 
