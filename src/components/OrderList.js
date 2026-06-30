@@ -93,7 +93,7 @@ export default function OrderList({ initialOrders }) {
       {filteredOrders.map((order) => (
         <div
           key={order.id}
-          className="overflow-hidden rounded-lg border border-border bg-card shadow-sm"
+          className="rounded-lg border border-border bg-card shadow-sm"
         >
           <OrderRow
             order={order}

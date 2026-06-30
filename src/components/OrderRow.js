@@ -12,7 +12,7 @@ export default function OrderRow({ order, isExpanded, onToggle, onEdit }) {
     <div
       className={cn(
         'flex cursor-pointer items-center gap-2 px-4 py-3 transition-colors outline-none hover:bg-accent/50 focus-visible:ring-2 focus-visible:ring-ring',
-        isExpanded && 'bg-accent/50'
+        isExpanded ? 'rounded-t-lg bg-accent/50' : 'rounded-lg'
       )}
       data-testid="order-row"
       role="button"

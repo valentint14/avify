@@ -41,7 +41,7 @@ export default function ProductBoard({ orderId, onProductChange, refreshKey }) {
   }
 
   return (
-    <div className="border-t border-border bg-muted/30 p-4 animate-in fade-in slide-in-from-top-1" data-testid="product-board">
+    <div className="rounded-b-lg border-t border-border bg-muted/30 p-4 animate-in fade-in slide-in-from-top-1" data-testid="product-board">
       <div className="flex gap-2 overflow-x-auto pb-2">
         {STAGES.map((stage) => (
           <ProductColumn
