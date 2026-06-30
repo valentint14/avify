@@ -39,8 +39,8 @@ description: "Task list for feature: Migration to shadcn/ui + Tailwind CSS v4"
 
 **Purpose**: Define the cross-cutting presentation pieces every surface reuses, so migrations stay consistent. Blocks the per-surface phases.
 
-- [ ] T009 Extend `src/components/ui/badge.js` with semantic variants (via CVA) mapping to the theme tokens: `status-in-progres`, `status-finalizata`, `event-nunta`, `event-botez`, `active` (collected/delivered green), `muted` (inactive), `warn` (low-stock) — used across orders, board, materials
-- [ ] T010 Establish the shared confirm pattern: confirm the generated `alert-dialog` supports the two-step destructive confirmation used by order + product delete (trigger, title/description, Cancel + destructive Action); document the intended usage in a short comment in `src/components/ui/alert-dialog.js`
+- [X] T009 Extended `src/components/ui/badge.jsx` with semantic CVA variants: `status-in-progres`, `status-finalizata`, `event-nunta`, `event-botez`, `active`, `muted`, `warn` — mapped to the theme tokens
+- [X] T010 Documented the two-step destructive confirm usage pattern in `src/components/ui/alert-dialog.jsx` (Radix provides focus trap/restore, Esc, role="alertdialog")
 
 **Checkpoint**: Shared Badge variants and the AlertDialog confirm pattern are ready for reuse.
 
@@ -52,11 +52,11 @@ description: "Task list for feature: Migration to shadcn/ui + Tailwind CSS v4"
 
 **Independent Test**: Add `data-testid` hooks + repoint the E2E suite; the full suite passes against the (initially still-legacy) UI, proving the test net is valid before restyling begins.
 
-- [ ] T011 [US1] Add `data-testid` attributes to the elements the E2E suite targets, across the app components, per the contract in data-model.md (order-row, order-edit, edit-order-modal, order-save/-delete/-delete-confirm, order-total/-profit, order-badge-*, filter-*, product-card/-delete/-delete-confirm, material-row/-edit/-delete, materials-alert, recipe-editor/-line/-save, add-*-submit). Keep existing markup otherwise so tests can be repointed before the restyle.
-- [ ] T012 [US1] Repoint Playwright specs to `getByTestId` / `getByRole`: `tests/e2e/add-items.spec.js`, `tests/e2e/order-fields.spec.js`, `tests/e2e/order-filters.spec.js`, `tests/e2e/materials-stock.spec.js` — remove all legacy CSS-class selectors (`.order-row`, `.edit-modal`, `.material-row`, `.product-card`, etc.)
-- [ ] T013 [US1] Run `npm run test:e2e` (feature suites) + `npm test` to confirm the repointed suite is green BEFORE any component restyle; this is the regression baseline
+- [X] T011 [US1] Added `data-testid` attributes across the app components: `order-row`, `order-status`, `order-edit`, `order-total`, `order-profit`, `order-badge-collected/-delivered` (+`data-active`), `order-save`, `order-delete`, `order-delete-confirm`, `order-check-collected/-delivered`, `product-line`, `product-qty`, `product-price`, `order-total-live`, `add-order-input/-submit/-error`, `add-product-form/-input/-submit/-error`, `product-board`, `product-column` (+`data-stage`), `product-card`, `product-delete`, `product-delete-confirm`, `product-summary`, `orders-empty`, `filter-reset`, `edit-order-modal`, `material-row`, `materials-add`, `materials-list`, `materials-alert`, `catalog-item`, `recipe-line`. Existing markup/ids kept.
+- [X] T012 [US1] **Partial — core specs done.** Repointed the 4 core feature specs (`add-items`, `order-fields`, `order-filters`, `materials-stock`) to `getByTestId`/`getByRole`; functional `#filter-*`/`#ord-*` ids kept (stable identifiers, still native selects pre-Phase-4). **Scope discovery**: there are ~13 E2E spec files, not 4 (`catalog-selector`, `catalog-crud`, `catalog-dnd`, `product-details`, `adhoc-product`, `drag-drop`, `auto-complete`, `navbar`, `expand-order`). These test components restyled in Phase 4 and use interaction patterns that change structurally (Radix select/dialog/dropdown), so they are repointed **per-surface during Phase 4** rather than upfront. Also fixed 3 previously-stale add-product tests (now use manual mode).
+- [X] T013 [US1] Ran the repointed core suite + unit: **24/24** core E2E pass, **185/185** unit/integration pass — green regression baseline for orders/products/materials/filters established before restyle.
 
-**Checkpoint**: A styling-agnostic test net exists and passes; restyling can now proceed surface-by-surface with confidence.
+**Checkpoint**: ✅ Core flows have a styling-agnostic test net (green). Remaining specs repointed as their surfaces migrate in Phase 4. Pausing here per staged plan.
 
 ---
 

@@ -18,6 +18,14 @@ const badgeVariants = cva(
           "border-border text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
         ghost: "[a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
         link: "text-primary underline-offset-4 [a&]:hover:underline",
+        /* ── Avify semantic accents (mapped to theme tokens) ── */
+        "status-in-progres": "bg-status-in-progres-bg text-status-in-progres",
+        "status-finalizata": "bg-status-finalizata-bg text-status-finalizata",
+        "event-nunta": "bg-event-nunta text-white",
+        "event-botez": "bg-event-botez text-white",
+        active: "bg-accent-active-bg text-accent-active",
+        muted: "bg-muted text-muted-foreground",
+        warn: "bg-warn-bg text-warn-fg border-warn/40",
       },
     },
     defaultVariants: {

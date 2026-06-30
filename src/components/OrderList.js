@@ -87,7 +87,7 @@ export default function OrderList({ initialOrders }) {
         <p className="order-list-empty">Nu există comenzi. Adaugă prima comandă.</p>
       )}
       {orders.length > 0 && filteredOrders.length === 0 && (
-        <p className="order-list-empty" role="status">
+        <p className="order-list-empty" role="status" data-testid="orders-empty">
           Nicio comandă găsită pentru filtrele selectate.
         </p>
       )}

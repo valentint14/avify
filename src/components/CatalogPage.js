@@ -103,6 +103,7 @@ export default function CatalogPage({ initialTemplates }) {
             <div
               key={t.id}
               className={`catalog-item${recipeId === t.id ? ' catalog-item--recipe' : ''}`}
+              data-testid="catalog-item"
             >
               <div className="catalog-item-row">
                 <div className="catalog-item-info">

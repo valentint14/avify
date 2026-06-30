@@ -9,6 +9,7 @@ export default function OrderRow({ order, isExpanded, onToggle, onEdit }) {
   return (
     <div
       className={`order-row${isExpanded ? ' order-row--expanded' : ''}`}
+      data-testid="order-row"
       role="button"
       tabIndex={0}
       aria-expanded={isExpanded}
@@ -25,31 +26,40 @@ export default function OrderRow({ order, isExpanded, onToggle, onEdit }) {
 
         <div className="order-row-identity">
           <span className="order-row-name">{order.name}</span>
-          <span className={statusClass}>{statusLabel}</span>
+          <span className={statusClass} data-testid="order-status" data-status={order.status}>{statusLabel}</span>
           <div className="order-row-badges">
-            <span className={`order-row-badge${order.collected ? ' order-row-badge--active' : ''}`}>
+            <span
+              className={`order-row-badge${order.collected ? ' order-row-badge--active' : ''}`}
+              data-testid="order-badge-collected"
+              data-active={order.collected ? 'true' : 'false'}
+            >
               Încasată
             </span>
-            <span className={`order-row-badge${order.delivered ? ' order-row-badge--active' : ''}`}>
+            <span
+              className={`order-row-badge${order.delivered ? ' order-row-badge--active' : ''}`}
+              data-testid="order-badge-delivered"
+              data-active={order.delivered ? 'true' : 'false'}
+            >
               Livrată
             </span>
           </div>
         </div>
 
         <div className="order-row-actions">
-          <span className="order-row-total">
+          <span className="order-row-total" data-testid="order-total">
             <span className="order-row-total-label">Total: </span>
             {Number(order.total ?? 0).toFixed(2)} RON
           </span>
-          <span className="order-row-profit">
+          <span className="order-row-profit" data-testid="order-profit">
             <span className="order-row-profit-label">Profit: </span>
             {Number(order.profit ?? 0).toFixed(2)} RON
           </span>
-          <span className="product-summary">
+          <span className="product-summary" data-testid="product-summary">
             {order.doneCount} / {order.productCount} gata
           </span>
           <button
             className="order-row-edit"
+            data-testid="order-edit"
             aria-label={`Editează produsele din comanda ${order.name}`}
             onClick={(e) => { e.stopPropagation(); onEdit(order.id); }}
           >

@@ -26,10 +26,11 @@ export default function ProductCard({ product, onDelete }) {
 
   if (confirming) {
     return (
-      <div className="product-card product-card--confirm" role="alertdialog" aria-label={`Confirmă ștergerea produsului ${product.name}`}>
+      <div className="product-card product-card--confirm" data-testid="product-card" role="alertdialog" aria-label={`Confirmă ștergerea produsului ${product.name}`}>
         <span className="product-card-confirm-text">Ștergi „{product.name}&rdquo;?</span>
         <button
           className="product-card-confirm-btn product-card-confirm-btn--yes"
+          data-testid="product-delete-confirm"
           onClick={(e) => { e.stopPropagation(); onDelete(product.id); }}
         >
           Șterge
@@ -48,6 +49,7 @@ export default function ProductCard({ product, onDelete }) {
     <>
       <div
         className={`product-card${product.additionalInfo ? ' product-card--has-info' : ''}`}
+        data-testid="product-card"
         draggable={true}
         tabIndex={0}
         onClick={handleCardClick}
@@ -62,6 +64,7 @@ export default function ProductCard({ product, onDelete }) {
         <span className="product-card-qty">×{product.quantity ?? 1}</span>
         <button
           className="product-card-delete"
+          data-testid="product-delete"
           aria-label={`Șterge produsul ${product.name}`}
           onClick={handleDeleteClick}
         >

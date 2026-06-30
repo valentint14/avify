@@ -1,5 +1,24 @@
 "use client"
 
+/*
+ * Two-step destructive confirmation (used for order + product delete).
+ * Usage:
+ *   <AlertDialog>
+ *     <AlertDialogTrigger asChild><Button variant="destructive">Șterge</Button></AlertDialogTrigger>
+ *     <AlertDialogContent>
+ *       <AlertDialogHeader>
+ *         <AlertDialogTitle>…</AlertDialogTitle>
+ *         <AlertDialogDescription>…</AlertDialogDescription>
+ *       </AlertDialogHeader>
+ *       <AlertDialogFooter>
+ *         <AlertDialogCancel>Anulează</AlertDialogCancel>
+ *         <AlertDialogAction onClick={confirm}>Confirmă</AlertDialogAction>
+ *       </AlertDialogFooter>
+ *     </AlertDialogContent>
+ *   </AlertDialog>
+ * Radix handles focus trap/restore, Escape, and role="alertdialog".
+ */
+
 import * as React from "react"
 import { AlertDialog as AlertDialogPrimitive } from "radix-ui"
 

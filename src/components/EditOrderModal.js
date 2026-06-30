@@ -214,6 +214,7 @@ export default function EditOrderModal({ orderId, onClose, onSaved, onDelete }) 
     >
       <div
         className="edit-modal"
+        data-testid="edit-order-modal"
         role="dialog"
         aria-modal="true"
         aria-label="Editează comanda"
@@ -347,7 +348,7 @@ export default function EditOrderModal({ orderId, onClose, onSaved, onDelete }) 
                     </div>
                   )}
                   <div className="edit-modal-checks">
-                    <label className="edit-modal-check">
+                    <label className="edit-modal-check" data-testid="order-check-collected">
                       <input
                         type="checkbox"
                         checked={orderFields.collected}
@@ -356,7 +357,7 @@ export default function EditOrderModal({ orderId, onClose, onSaved, onDelete }) 
                       />
                       Încasată
                     </label>
-                    <label className="edit-modal-check">
+                    <label className="edit-modal-check" data-testid="order-check-delivered">
                       <input
                         type="checkbox"
                         checked={orderFields.delivered}
@@ -378,7 +379,7 @@ export default function EditOrderModal({ orderId, onClose, onSaved, onDelete }) 
                 {products.length > 0 && (
                   <div className="edit-modal-list">
                     {products.map((p) => (
-                      <div key={p.id} className="edit-modal-product">
+                      <div key={p.id} className="edit-modal-product" data-testid="product-line" data-product-name={p.name}>
                         <p className="edit-modal-product-name">{p.name}</p>
                         <div className="edit-modal-fields">
                           <div className="edit-modal-field edit-modal-field--qty">
@@ -389,6 +390,7 @@ export default function EditOrderModal({ orderId, onClose, onSaved, onDelete }) 
                               id={`qty-${p.id}`}
                               type="number"
                               className="edit-modal-input-qty"
+                              data-testid="product-qty"
                               min="1"
                               value={currentValue(p, 'quantity')}
                               onChange={(e) => handleChange(p.id, 'quantity', e.target.value)}
@@ -403,6 +405,7 @@ export default function EditOrderModal({ orderId, onClose, onSaved, onDelete }) 
                               id={`price-${p.id}`}
                               type="number"
                               className="edit-modal-input-qty"
+                              data-testid="product-price"
                               min="0"
                               step="0.01"
                               value={currentValue(p, 'unitPrice')}
@@ -431,7 +434,7 @@ export default function EditOrderModal({ orderId, onClose, onSaved, onDelete }) 
                 )}
                 <div className="edit-modal-total-summary">
                   <span>Total comandă:</span>
-                  <strong>{liveTotal.toFixed(2)} RON</strong>
+                  <strong data-testid="order-total-live">{liveTotal.toFixed(2)} RON</strong>
                 </div>
               </div>
             </>
@@ -457,6 +460,7 @@ export default function EditOrderModal({ orderId, onClose, onSaved, onDelete }) 
             <button
               type="button"
               className="edit-modal-btn edit-modal-btn--danger"
+              data-testid="order-delete-confirm"
               onClick={performDelete}
               disabled={deleting}
             >
@@ -468,6 +472,7 @@ export default function EditOrderModal({ orderId, onClose, onSaved, onDelete }) 
             <button
               type="button"
               className="edit-modal-btn edit-modal-btn--danger edit-modal-btn--delete"
+              data-testid="order-delete"
               onClick={() => setConfirmDelete(true)}
               disabled={busy || loading}
             >
@@ -484,6 +489,7 @@ export default function EditOrderModal({ orderId, onClose, onSaved, onDelete }) 
             <button
               type="button"
               className="edit-modal-btn edit-modal-btn--primary"
+              data-testid="order-save"
               onClick={handleSave}
               disabled={busy || loading}
             >

@@ -70,7 +70,7 @@ export default function MaterialsPage({ initialMaterials }) {
       </div>
 
       {lowStock.length > 0 && (
-        <div className="materials-alert" role="status">
+        <div className="materials-alert" role="status" data-testid="materials-alert">
           <span className="materials-alert-title">⚠ Stoc sub minim</span>
           <ul className="materials-alert-list">
             {lowStock.map((m) => (
@@ -82,20 +82,20 @@ export default function MaterialsPage({ initialMaterials }) {
         </div>
       )}
 
-      <div className="materials-add-section">
+      <div className="materials-add-section" data-testid="materials-add">
         <p className="materials-add-title">Adaugă material nou</p>
         <MaterialForm key="add-form" onSave={handleAdd} submitLabel="Adaugă" />
         {error && <p className="material-form-error" style={{ marginTop: '8px' }}>{error}</p>}
       </div>
 
-      <div className="materials-list">
+      <div className="materials-list" data-testid="materials-list">
         {materials.length === 0 && (
           <p className="materials-empty">Niciun material. Adaugă primul material de mai sus.</p>
         )}
 
         {materials.map((m) =>
           editingId === m.id ? (
-            <div key={m.id} className="material-row">
+            <div key={m.id} className="material-row" data-testid="material-row">
               <MaterialForm
                 initialValues={{
                   name: m.name,
@@ -109,7 +109,7 @@ export default function MaterialsPage({ initialMaterials }) {
               />
             </div>
           ) : (
-            <div key={m.id} className={`material-row${isLowStock(m) ? ' material-row--low' : ''}`}>
+            <div key={m.id} className={`material-row${isLowStock(m) ? ' material-row--low' : ''}`} data-testid="material-row">
               <span className="material-row-name">{m.name}</span>
               <span className="material-row-stock">
                 {m.currentStock} {m.unit ?? ''} · minim {m.minStock}

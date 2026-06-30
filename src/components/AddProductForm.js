@@ -104,7 +104,7 @@ export default function AddProductForm({ orderId, onProductAdded, excludedTempla
   }
 
   return (
-    <form className="add-form add-product-form" onSubmit={handleSubmit} noValidate style={{ flexDirection: 'column', alignItems: 'stretch' }}>
+    <form className="add-form add-product-form" data-testid="add-product-form" onSubmit={handleSubmit} noValidate style={{ flexDirection: 'column', alignItems: 'stretch' }}>
       <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
         <div className="mode-toggle" style={{ margin: 0 }}>
           <button
@@ -122,7 +122,7 @@ export default function AddProductForm({ orderId, onProductAdded, excludedTempla
             Scrie manual
           </button>
         </div>
-        <button className="add-form-btn" type="submit" disabled={isDisabled} style={{ marginLeft: 'auto', flexShrink: 0 }}>
+        <button className="add-form-btn" data-testid="add-product-submit" type="submit" disabled={isDisabled} style={{ marginLeft: 'auto', flexShrink: 0 }}>
           {submitting ? 'Se adaugă…' : 'Adaugă produs'}
         </button>
       </div>
@@ -181,6 +181,7 @@ export default function AddProductForm({ orderId, onProductAdded, excludedTempla
         <div className="manual-details">
           <input
             className="manual-details-name"
+            data-testid="add-product-input"
             type="text"
             placeholder="Numele produsului…"
             value={name}
@@ -217,7 +218,7 @@ export default function AddProductForm({ orderId, onProductAdded, excludedTempla
         </div>
       </div>
 
-      {error && <span className="add-form-error">{error}</span>}
+      {error && <span className="add-form-error" data-testid="add-product-error">{error}</span>}
     </form>
   );
 }

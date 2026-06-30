@@ -105,7 +105,7 @@ export default function RecipeEditor({ templateId }) {
           (m) => m.id === line.materialId || !usedIds.has(m.id)
         );
         return (
-          <div key={index} className="recipe-line">
+          <div key={index} className="recipe-line" data-testid="recipe-line">
             <select
               className="recipe-line-select"
               value={line.materialId}

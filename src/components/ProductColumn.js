@@ -31,6 +31,8 @@ export default function ProductColumn({ stage, products, onDrop, onDeleteProduct
   return (
     <div
       className={`product-column${isDragOver ? ' drag-over' : ''}`}
+      data-testid="product-column"
+      data-stage={stage.id}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}

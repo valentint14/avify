@@ -92,7 +92,7 @@ export default function OrderFilters({ filters, onChange, onReset, countyOptions
       </div>
 
       {isActive && (
-        <button type="button" className="order-filters__reset" onClick={onReset}>
+        <button type="button" className="order-filters__reset" data-testid="filter-reset" onClick={onReset}>
           Resetează filtrele
         </button>
       )}

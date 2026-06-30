@@ -42,7 +42,7 @@ export default function ProductBoard({ orderId, onProductChange, refreshKey }) {
   }
 
   return (
-    <div className="product-board">
+    <div className="product-board" data-testid="product-board">
       <div className="product-board-columns">
         {STAGES.map((stage) => (
           <ProductColumn
