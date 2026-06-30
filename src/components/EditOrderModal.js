@@ -1,10 +1,33 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { createPortal } from 'react-dom';
-import '../styles/product-modal.css';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from '@/components/ui/select';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 const CONTACT_PLATFORMS = ['Facebook', 'Instagram', 'TikTok', 'Telefon', 'Email'];
+const NONE = '__none__';
 
 const EMPTY_ORDER_FIELDS = {
   client: '',
@@ -20,7 +43,6 @@ const EMPTY_ORDER_FIELDS = {
 };
 
 export default function EditOrderModal({ orderId, onClose, onSaved, onDelete }) {
-  const [open, setOpen] = useState(false);
   const [products, setProducts] = useState([]);
   const [edits, setEdits] = useState({});
   const [orderFields, setOrderFields] = useState(EMPTY_ORDER_FIELDS);
@@ -29,13 +51,7 @@ export default function EditOrderModal({ orderId, onClose, onSaved, onDelete }) 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
-  const [confirmDelete, setConfirmDelete] = useState(false);
   const [error, setError] = useState('');
-
-  useEffect(() => {
-    const frame = requestAnimationFrame(() => setOpen(true));
-    return () => cancelAnimationFrame(frame);
-  }, []);
 
   useEffect(() => {
     Promise.all([
@@ -70,19 +86,8 @@ export default function EditOrderModal({ orderId, onClose, onSaved, onDelete }) 
       });
   }, [orderId]);
 
-  useEffect(() => {
-    function onKeyDown(e) {
-      if (e.key === 'Escape') onClose();
-    }
-    document.addEventListener('keydown', onKeyDown);
-    return () => document.removeEventListener('keydown', onKeyDown);
-  }, [onClose]);
-
   function handleChange(productId, field, value) {
-    setEdits((prev) => ({
-      ...prev,
-      [productId]: { ...prev[productId], [field]: value },
-    }));
+    setEdits((prev) => ({ ...prev, [productId]: { ...prev[productId], [field]: value } }));
   }
 
   function setField(field, value) {
@@ -95,7 +100,7 @@ export default function EditOrderModal({ orderId, onClose, onSaved, onDelete }) 
       setField('contactPlatform', '');
     } else {
       setCustomPlatform(false);
-      setField('contactPlatform', value);
+      setField('contactPlatform', value === NONE ? '' : value);
     }
   }
 
@@ -201,304 +206,175 @@ export default function EditOrderModal({ orderId, onClose, onSaved, onDelete }) 
     }
   }
 
-  function handleOverlayClick(e) {
-    if (e.target === e.currentTarget) onClose();
-  }
-
   const busy = saving || deleting;
+  const fieldCls = 'flex flex-col gap-1.5';
 
-  return createPortal(
-    <div
-      className={`product-modal-overlay${open ? ' product-modal-overlay--open' : ''}`}
-      onClick={handleOverlayClick}
-    >
-      <div
-        className="edit-modal"
+  return (
+    <Dialog open onOpenChange={(o) => { if (!o) onClose(); }}>
+      <DialogContent
+        className="max-h-[85vh] gap-0 overflow-y-auto sm:max-w-2xl"
         data-testid="edit-order-modal"
-        role="dialog"
-        aria-modal="true"
-        aria-label="Editează comanda"
       >
-        {/* Header */}
-        <div className="edit-modal-header">
-          <h2 className="edit-modal-title">Editează comanda</h2>
-          <button className="edit-modal-close" aria-label="Închide" onClick={onClose}>×</button>
-        </div>
+        <DialogHeader>
+          <DialogTitle>Editează comanda</DialogTitle>
+        </DialogHeader>
 
-        {/* Body */}
-        <div className="edit-modal-body">
-          {loading && <p className="edit-modal-empty">Se încarcă…</p>}
+        {loading && <p className="py-6 text-sm text-muted-foreground">Se încarcă…</p>}
 
-          {!loading && (
-            <>
-              {/* Order details */}
-              <div>
-                <h3 className="edit-modal-section-title">Detalii comandă</h3>
-                <div className="edit-modal-order-details">
-                  <div className="edit-modal-order-field">
-                    <label className="edit-modal-label" htmlFor="ord-client">Client</label>
-                    <input
-                      id="ord-client"
-                      type="text"
-                      className="edit-modal-input"
-                      value={orderFields.client}
-                      onChange={(e) => setField('client', e.target.value)}
-                      disabled={saving}
-                    />
-                  </div>
-                  <div className="edit-modal-order-field">
-                    <label className="edit-modal-label" htmlFor="ord-county">Județ</label>
-                    <input
-                      id="ord-county"
-                      type="text"
-                      className="edit-modal-input"
-                      value={orderFields.county}
-                      onChange={(e) => setField('county', e.target.value)}
-                      disabled={saving}
-                    />
-                  </div>
-                  <div className="edit-modal-order-field">
-                    <label className="edit-modal-label" htmlFor="ord-reception">Dată primire</label>
-                    <input
-                      id="ord-reception"
-                      type="date"
-                      className="edit-modal-input"
-                      value={orderFields.receptionDate}
-                      onChange={(e) => setField('receptionDate', e.target.value)}
-                      disabled={saving}
-                    />
-                  </div>
-                  <div className="edit-modal-order-field">
-                    <label className="edit-modal-label" htmlFor="ord-event">Dată eveniment</label>
-                    <input
-                      id="ord-event"
-                      type="date"
-                      className="edit-modal-input"
-                      value={orderFields.eventDate}
-                      onChange={(e) => setField('eventDate', e.target.value)}
-                      disabled={saving}
-                    />
-                  </div>
-                  <div className="edit-modal-order-field">
-                    <label className="edit-modal-label" htmlFor="ord-delivery">Termen livrare</label>
-                    <input
-                      id="ord-delivery"
-                      type="date"
-                      className="edit-modal-input"
-                      value={orderFields.deliveryDate}
-                      onChange={(e) => setField('deliveryDate', e.target.value)}
-                      disabled={saving}
-                    />
-                  </div>
-                  <div className="edit-modal-order-field">
-                    <label className="edit-modal-label" htmlFor="ord-advance">Avans (RON)</label>
-                    <input
-                      id="ord-advance"
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      className="edit-modal-input"
-                      value={orderFields.advance}
-                      onChange={(e) => setField('advance', e.target.value)}
-                      disabled={saving}
-                    />
-                  </div>
-                  <div className="edit-modal-order-field">
-                    <label className="edit-modal-label" htmlFor="ord-profit">Profit (RON)</label>
-                    <input
-                      id="ord-profit"
-                      type="number"
-                      step="0.01"
-                      className="edit-modal-input"
-                      value={orderFields.profit}
-                      onChange={(e) => setField('profit', e.target.value)}
-                      disabled={saving}
-                    />
-                  </div>
-                  <div className="edit-modal-order-field">
-                    <label className="edit-modal-label" htmlFor="ord-platform">Platformă contact</label>
-                    <select
-                      id="ord-platform"
-                      className="edit-modal-input"
-                      value={customPlatform ? 'Altele' : orderFields.contactPlatform}
-                      onChange={(e) => handlePlatformSelect(e.target.value)}
-                      disabled={saving}
-                    >
-                      <option value="">—</option>
+        {!loading && (
+          <div className="flex flex-col gap-6 py-2">
+            {/* Order details */}
+            <section>
+              <h3 className="mb-3 text-sm font-semibold text-foreground">Detalii comandă</h3>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div className={fieldCls}>
+                  <Label htmlFor="ord-client">Client</Label>
+                  <Input id="ord-client" value={orderFields.client} onChange={(e) => setField('client', e.target.value)} disabled={saving} />
+                </div>
+                <div className={fieldCls}>
+                  <Label htmlFor="ord-county">Județ</Label>
+                  <Input id="ord-county" value={orderFields.county} onChange={(e) => setField('county', e.target.value)} disabled={saving} />
+                </div>
+                <div className={fieldCls}>
+                  <Label htmlFor="ord-reception">Dată primire</Label>
+                  <Input id="ord-reception" type="date" value={orderFields.receptionDate} onChange={(e) => setField('receptionDate', e.target.value)} disabled={saving} />
+                </div>
+                <div className={fieldCls}>
+                  <Label htmlFor="ord-event">Dată eveniment</Label>
+                  <Input id="ord-event" type="date" value={orderFields.eventDate} onChange={(e) => setField('eventDate', e.target.value)} disabled={saving} />
+                </div>
+                <div className={fieldCls}>
+                  <Label htmlFor="ord-delivery">Termen livrare</Label>
+                  <Input id="ord-delivery" type="date" value={orderFields.deliveryDate} onChange={(e) => setField('deliveryDate', e.target.value)} disabled={saving} />
+                </div>
+                <div className={fieldCls}>
+                  <Label htmlFor="ord-advance">Avans (RON)</Label>
+                  <Input id="ord-advance" type="number" min="0" step="0.01" value={orderFields.advance} onChange={(e) => setField('advance', e.target.value)} disabled={saving} />
+                </div>
+                <div className={fieldCls}>
+                  <Label htmlFor="ord-profit">Profit (RON)</Label>
+                  <Input id="ord-profit" type="number" step="0.01" value={orderFields.profit} onChange={(e) => setField('profit', e.target.value)} disabled={saving} />
+                </div>
+                <div className={fieldCls}>
+                  <Label>Platformă contact</Label>
+                  <Select
+                    value={customPlatform ? 'Altele' : (orderFields.contactPlatform || NONE)}
+                    onValueChange={handlePlatformSelect}
+                    disabled={saving}
+                  >
+                    <SelectTrigger data-testid="ord-platform" aria-label="Platformă contact">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={NONE}>—</SelectItem>
                       {CONTACT_PLATFORMS.map((p) => (
-                        <option key={p} value={p}>{p}</option>
+                        <SelectItem key={p} value={p}>{p}</SelectItem>
                       ))}
-                      <option value="Altele">Altele</option>
-                    </select>
+                      <SelectItem value="Altele">Altele</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                {customPlatform && (
+                  <div className={`${fieldCls} sm:col-span-2`}>
+                    <Label htmlFor="ord-platform-custom">Platformă personalizată</Label>
+                    <Input
+                      id="ord-platform-custom"
+                      value={orderFields.contactPlatform}
+                      onChange={(e) => setField('contactPlatform', e.target.value)}
+                      disabled={saving}
+                      placeholder="ex. WhatsApp"
+                    />
                   </div>
-                  {customPlatform && (
-                    <div className="edit-modal-order-field edit-modal-order-field--full">
-                      <label className="edit-modal-label" htmlFor="ord-platform-custom">
-                        Platformă personalizată
-                      </label>
-                      <input
-                        id="ord-platform-custom"
-                        type="text"
-                        className="edit-modal-input"
-                        value={orderFields.contactPlatform}
-                        onChange={(e) => setField('contactPlatform', e.target.value)}
-                        disabled={saving}
-                        placeholder="ex. WhatsApp"
-                      />
-                    </div>
-                  )}
-                  <div className="edit-modal-checks">
-                    <label className="edit-modal-check" data-testid="order-check-collected">
-                      <input
-                        type="checkbox"
-                        checked={orderFields.collected}
-                        onChange={(e) => setField('collected', e.target.checked)}
-                        disabled={saving}
-                      />
-                      Încasată
-                    </label>
-                    <label className="edit-modal-check" data-testid="order-check-delivered">
-                      <input
-                        type="checkbox"
-                        checked={orderFields.delivered}
-                        onChange={(e) => setField('delivered', e.target.checked)}
-                        disabled={saving}
-                      />
-                      Livrată
-                    </label>
-                  </div>
+                )}
+                <div className="flex items-center gap-6 sm:col-span-2">
+                  <label className="flex items-center gap-2 text-sm" data-testid="order-check-collected">
+                    <Checkbox
+                      checked={orderFields.collected}
+                      onCheckedChange={(v) => setField('collected', Boolean(v))}
+                      disabled={saving}
+                    />
+                    Încasată
+                  </label>
+                  <label className="flex items-center gap-2 text-sm" data-testid="order-check-delivered">
+                    <Checkbox
+                      checked={orderFields.delivered}
+                      onCheckedChange={(v) => setField('delivered', Boolean(v))}
+                      disabled={saving}
+                    />
+                    Livrată
+                  </label>
                 </div>
               </div>
+            </section>
 
-              {/* Products */}
-              <div>
-                <h3 className="edit-modal-section-title">Produse</h3>
-                {products.length === 0 && (
-                  <p className="edit-modal-empty">Niciun produs în această comandă.</p>
-                )}
-                {products.length > 0 && (
-                  <div className="edit-modal-list">
-                    {products.map((p) => (
-                      <div key={p.id} className="edit-modal-product" data-testid="product-line" data-product-name={p.name}>
-                        <p className="edit-modal-product-name">{p.name}</p>
-                        <div className="edit-modal-fields">
-                          <div className="edit-modal-field edit-modal-field--qty">
-                            <label className="edit-modal-label" htmlFor={`qty-${p.id}`}>
-                              Cantitate
-                            </label>
-                            <input
-                              id={`qty-${p.id}`}
-                              type="number"
-                              className="edit-modal-input-qty"
-                              data-testid="product-qty"
-                              min="1"
-                              value={currentValue(p, 'quantity')}
-                              onChange={(e) => handleChange(p.id, 'quantity', e.target.value)}
-                              disabled={saving}
-                            />
-                          </div>
-                          <div className="edit-modal-field edit-modal-field--unit-price">
-                            <label className="edit-modal-label" htmlFor={`price-${p.id}`}>
-                              Preț unitar (RON)
-                            </label>
-                            <input
-                              id={`price-${p.id}`}
-                              type="number"
-                              className="edit-modal-input-qty"
-                              data-testid="product-price"
-                              min="0"
-                              step="0.01"
-                              value={currentValue(p, 'unitPrice')}
-                              onChange={(e) => handleChange(p.id, 'unitPrice', e.target.value)}
-                              disabled={saving}
-                            />
-                          </div>
-                          <div className="edit-modal-field edit-modal-field--info">
-                            <label className="edit-modal-label" htmlFor={`info-${p.id}`}>
-                              Informații suplimentare
-                            </label>
-                            <textarea
-                              id={`info-${p.id}`}
-                              className="edit-modal-textarea"
-                              value={currentValue(p, 'additionalInfo')}
-                              onChange={(e) => handleChange(p.id, 'additionalInfo', e.target.value)}
-                              disabled={saving}
-                              rows={2}
-                              placeholder="Culori, fonturi, text personalizat…"
-                            />
-                          </div>
+            {/* Products */}
+            <section>
+              <h3 className="mb-3 text-sm font-semibold text-foreground">Produse</h3>
+              {products.length === 0 && <p className="text-sm text-muted-foreground">Niciun produs în această comandă.</p>}
+              {products.length > 0 && (
+                <div className="flex flex-col gap-3">
+                  {products.map((p) => (
+                    <div key={p.id} className="rounded-md border border-border p-3" data-testid="product-line" data-product-name={p.name}>
+                      <p className="mb-2 font-medium">{p.name}</p>
+                      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                        <div className={fieldCls}>
+                          <Label htmlFor={`qty-${p.id}`}>Cantitate</Label>
+                          <Input id={`qty-${p.id}`} type="number" min="1" data-testid="product-qty" value={currentValue(p, 'quantity')} onChange={(e) => handleChange(p.id, 'quantity', e.target.value)} disabled={saving} />
+                        </div>
+                        <div className={fieldCls}>
+                          <Label htmlFor={`price-${p.id}`}>Preț unitar (RON)</Label>
+                          <Input id={`price-${p.id}`} type="number" min="0" step="0.01" data-testid="product-price" value={currentValue(p, 'unitPrice')} onChange={(e) => handleChange(p.id, 'unitPrice', e.target.value)} disabled={saving} />
+                        </div>
+                        <div className={`${fieldCls} sm:col-span-2`}>
+                          <Label htmlFor={`info-${p.id}`}>Informații suplimentare</Label>
+                          <Textarea id={`info-${p.id}`} rows={2} value={currentValue(p, 'additionalInfo')} onChange={(e) => handleChange(p.id, 'additionalInfo', e.target.value)} disabled={saving} placeholder="Culori, fonturi, text personalizat…" />
                         </div>
                       </div>
-                    ))}
-                  </div>
-                )}
-                <div className="edit-modal-total-summary">
-                  <span>Total comandă:</span>
-                  <strong data-testid="order-total-live">{liveTotal.toFixed(2)} RON</strong>
+                    </div>
+                  ))}
                 </div>
+              )}
+              <div className="mt-3 flex items-center justify-between border-t border-border pt-3">
+                <span className="text-sm text-muted-foreground">Total comandă:</span>
+                <strong data-testid="order-total-live">{liveTotal.toFixed(2)} RON</strong>
               </div>
-            </>
-          )}
+            </section>
 
-          {error && <p className="edit-modal-error">{error}</p>}
-        </div>
-
-        {/* Footer */}
-        {confirmDelete ? (
-          <div className="edit-modal-footer edit-modal-footer--confirm">
-            <span className="edit-modal-confirm-text">
-              Ștergi comanda {orderName ? `„${orderName}"` : 'aceasta'}? Toate produsele vor fi șterse.
-            </span>
-            <button
-              type="button"
-              className="edit-modal-btn edit-modal-btn--secondary"
-              onClick={() => setConfirmDelete(false)}
-              disabled={deleting}
-            >
-              Anulează
-            </button>
-            <button
-              type="button"
-              className="edit-modal-btn edit-modal-btn--danger"
-              data-testid="order-delete-confirm"
-              onClick={performDelete}
-              disabled={deleting}
-            >
-              {deleting ? 'Se șterge…' : 'Confirmă ștergerea'}
-            </button>
-          </div>
-        ) : (
-          <div className="edit-modal-footer">
-            <button
-              type="button"
-              className="edit-modal-btn edit-modal-btn--danger edit-modal-btn--delete"
-              data-testid="order-delete"
-              onClick={() => setConfirmDelete(true)}
-              disabled={busy || loading}
-            >
-              Șterge comanda
-            </button>
-            <button
-              type="button"
-              className="edit-modal-btn edit-modal-btn--secondary"
-              onClick={onClose}
-              disabled={busy}
-            >
-              Anulează
-            </button>
-            <button
-              type="button"
-              className="edit-modal-btn edit-modal-btn--primary"
-              data-testid="order-save"
-              onClick={handleSave}
-              disabled={busy || loading}
-            >
-              {saving ? 'Se salvează…' : 'Salvează'}
-            </button>
+            {error && <p className="text-sm text-destructive">{error}</p>}
           </div>
         )}
-      </div>
-    </div>,
-    document.body
+
+        <DialogFooter className="border-t border-border pt-4 sm:justify-between">
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="outline" className="text-destructive" data-testid="order-delete" disabled={busy || loading}>
+                Șterge comanda
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>
+                  Ștergi comanda {orderName ? `„${orderName}”` : 'aceasta'}?
+                </AlertDialogTitle>
+                <AlertDialogDescription>Toate produsele vor fi șterse.</AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel disabled={deleting}>Anulează</AlertDialogCancel>
+                <AlertDialogAction data-testid="order-delete-confirm" onClick={performDelete} disabled={deleting}>
+                  {deleting ? 'Se șterge…' : 'Confirmă ștergerea'}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+
+          <div className="flex gap-2">
+            <Button variant="secondary" onClick={onClose} disabled={busy}>Anulează</Button>
+            <Button onClick={handleSave} disabled={busy || loading} data-testid="order-save">
+              {saving ? 'Se salvează…' : 'Salvează'}
+            </Button>
+          </div>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

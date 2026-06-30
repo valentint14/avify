@@ -56,10 +56,11 @@ test.describe('Feature 006 — Extended order fields & totals', () => {
     await page.fill('#ord-county', 'Cluj');
     await page.fill('#ord-advance', '500');
     await page.fill('#ord-profit', '150');
-    await page.selectOption('#ord-platform', 'Facebook');
+    await page.getByTestId('ord-platform').click();
+    await page.getByRole('option', { name: 'Facebook' }).click();
     await page.fill('#ord-reception', '2026-07-01');
     await page.fill('#ord-event', '2026-08-15');
-    await page.getByTestId('order-check-collected').locator('input').check();
+    await page.getByTestId('order-check-collected').getByRole('checkbox').click();
     await save(page);
 
     // Reload and reopen — values must be pre-populated
@@ -70,11 +71,11 @@ test.describe('Feature 006 — Extended order fields & totals', () => {
     await expect(page.locator('#ord-county')).toHaveValue('Cluj');
     await expect(page.locator('#ord-advance')).toHaveValue('500');
     await expect(page.locator('#ord-profit')).toHaveValue('150');
-    await expect(page.locator('#ord-platform')).toHaveValue('Facebook');
+    await expect(page.getByTestId('ord-platform')).toContainText('Facebook');
     await expect(page.locator('#ord-reception')).toHaveValue('2026-07-01');
     await expect(page.locator('#ord-event')).toHaveValue('2026-08-15');
     await expect(
-      page.getByTestId('order-check-collected').locator('input')
+      page.getByTestId('order-check-collected').getByRole('checkbox')
     ).toBeChecked();
   });
 
@@ -130,14 +131,15 @@ test.describe('Feature 006 — Extended order fields & totals', () => {
 
     await page.goto('/');
     await openEditModal(page, 'Custom Platform');
-    await page.selectOption('#ord-platform', 'Altele');
+    await page.getByTestId('ord-platform').click();
+    await page.getByRole('option', { name: 'Altele' }).click();
     await expect(page.locator('#ord-platform-custom')).toBeVisible();
     await page.fill('#ord-platform-custom', 'WhatsApp');
     await save(page);
 
     await page.reload();
     await openEditModal(page, 'Custom Platform');
-    await expect(page.locator('#ord-platform')).toHaveValue('Altele');
+    await expect(page.getByTestId('ord-platform')).toContainText('Altele');
     await expect(page.locator('#ord-platform-custom')).toHaveValue('WhatsApp');
   });
 
