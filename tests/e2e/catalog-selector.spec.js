@@ -18,97 +18,93 @@ async function createTemplate(request, name) {
 }
 
 function orderRow(page, name) {
-  return page.locator('.order-row', { has: page.locator('.order-row-name', { hasText: name }) });
+  return page.getByTestId('order-row').filter({ hasText: name });
 }
 
-test.describe('US2 — Catalog selector in order creation', () => {
+// Open an order's board and the product search combobox.
+async function openProductSearch(page, orderName) {
+  await orderRow(page, orderName).click();
+  await expect(page.getByTestId('product-board')).toBeVisible();
+  await page.getByTestId('product-search').click();
+}
+
+test.describe('US2 — Catalog selection via the product combobox', () => {
   test.beforeEach(async ({ request }) => {
     await clearOrders(request);
     await clearCatalog(request);
   });
 
-  test('catalog selector visible in AddOrderForm', async ({ page, request }) => {
-    await createTemplate(request, 'Invitație clasică');
-    await page.goto('/');
-    await expect(page.locator('.catalog-selector-input').first()).toBeVisible();
-  });
-
-  test('selector filters templates by query', async ({ page, request }) => {
+  test('catalog products appear in the search results', async ({ page, request }) => {
     await createTemplate(request, 'Invitație clasică');
     await createTemplate(request, 'Meniu nuntă');
+    await request.post('/api/orders', { data: { name: 'Catalog Visible Order' } });
 
     await page.goto('/');
-    await page.locator('.catalog-selector-input').first().fill('invit');
-    await page.locator('.catalog-selector-input').first().click();
+    await openProductSearch(page, 'Catalog Visible Order');
 
-    await expect(page.locator('.catalog-selector-dropdown').first()).toBeVisible({ timeout: 3000 });
-    const options = page.locator('.catalog-selector-dropdown').first().locator('.catalog-selector-option');
-    await expect(options).toHaveCount(1);
-    await expect(options.first()).toContainText('Invitație clasică');
+    await expect(page.getByTestId('catalog-option').filter({ hasText: 'Invitație clasică' })).toBeVisible();
+    await expect(page.getByTestId('catalog-option').filter({ hasText: 'Meniu nuntă' })).toBeVisible();
   });
 
-  test('selecting templates creates chips', async ({ page, request }) => {
+  test('typing filters the catalog options', async ({ page, request }) => {
+    await createTemplate(request, 'Invitație clasică');
     await createTemplate(request, 'Meniu nuntă');
+    await request.post('/api/orders', { data: { name: 'Filter Order' } });
+
+    await page.goto('/');
+    await openProductSearch(page, 'Filter Order');
+    await page.getByTestId('product-search').fill('meniu');
+
+    await expect(page.getByTestId('catalog-option').filter({ hasText: 'Meniu nuntă' })).toBeVisible();
+    await expect(page.getByTestId('catalog-option').filter({ hasText: 'Invitație clasică' })).toHaveCount(0);
+  });
+
+  test('selecting a catalog product adds it as an item', async ({ page, request }) => {
+    await createTemplate(request, 'Meniu nuntă');
+    await request.post('/api/orders', { data: { name: 'Select Order' } });
+
+    await page.goto('/');
+    await openProductSearch(page, 'Select Order');
+    await page.getByTestId('catalog-option').filter({ hasText: 'Meniu nuntă' }).click();
+
+    await expect(page.getByTestId('add-product-item').filter({ hasText: 'Meniu nuntă' })).toBeVisible();
+  });
+
+  test('add catalog products — they appear in the mini-board', async ({ page, request }) => {
+    await createTemplate(request, 'Invitație clasică');
+    await createTemplate(request, 'Meniu nuntă');
+    await request.post('/api/orders', { data: { name: 'Board Catalog Order' } });
+
+    await page.goto('/');
+    await openProductSearch(page, 'Board Catalog Order');
+    await page.getByTestId('catalog-option').filter({ hasText: 'Invitație clasică' }).click();
+    await page.getByTestId('product-search').click();
+    await page.getByTestId('catalog-option').filter({ hasText: 'Meniu nuntă' }).click();
+    await page.getByTestId('add-product-submit').click();
+
+    const deFacut = page.getByTestId('product-column').first();
+    await expect(deFacut.getByTestId('product-card')).toHaveCount(2, { timeout: 3000 });
+  });
+
+  test('empty catalog shows guidance to add a product', async ({ page, request }) => {
+    await request.post('/api/orders', { data: { name: 'Empty Catalog Order' } });
+    await page.goto('/');
+    await openProductSearch(page, 'Empty Catalog Order');
+
+    await expect(page.getByText('Scrie un nume pentru a adăuga un produs.')).toBeVisible({ timeout: 2000 });
+  });
+
+  test('remove a selected item before submitting', async ({ page, request }) => {
     await createTemplate(request, 'Place card');
+    await request.post('/api/orders', { data: { name: 'Remove Item Order' } });
 
     await page.goto('/');
-    const selectorInput = page.locator('.catalog-selector-input').first();
+    await openProductSearch(page, 'Remove Item Order');
+    await page.getByTestId('catalog-option').filter({ hasText: 'Place card' }).click();
 
-    await selectorInput.click();
-    await page.locator('.catalog-selector-dropdown').first().locator('.catalog-selector-option', { hasText: 'Meniu nuntă' }).click();
-
-    await expect(page.locator('.catalog-chip', { hasText: 'Meniu nuntă' }).first()).toBeVisible({ timeout: 2000 });
-
-    await selectorInput.click();
-    await page.locator('.catalog-selector-dropdown').first().locator('.catalog-selector-option', { hasText: 'Place card' }).click();
-
-    const chips = page.locator('.catalog-chip');
-    await expect(chips).toHaveCount(2, { timeout: 2000 });
-  });
-
-  test('create order with catalog products — products appear in mini-board', async ({ page, request }) => {
-    await createTemplate(request, 'Invitație clasică');
-    await createTemplate(request, 'Meniu nuntă');
-
-    await page.goto('/');
-
-    await page.locator('.add-form-input').first().fill('Nuntă Catalog Test');
-
-    const selectorInput = page.locator('.catalog-selector-input').first();
-    await selectorInput.click();
-    await page.locator('.catalog-selector-dropdown').first().locator('.catalog-selector-option', { hasText: 'Invitație clasică' }).click();
-
-    await selectorInput.click();
-    await page.locator('.catalog-selector-dropdown').first().locator('.catalog-selector-option', { hasText: 'Meniu nuntă' }).click();
-
-    await page.locator('.add-form-btn').first().click();
-
-    const row = orderRow(page, 'Nuntă Catalog Test');
-    await expect(row).toBeVisible({ timeout: 3000 });
-    await row.click();
-
-    await expect(page.locator('.product-board')).toBeVisible({ timeout: 3000 });
-    const deFacutColumn = page.locator('.product-column').first();
-    await expect(deFacutColumn.locator('.product-card')).toHaveCount(2, { timeout: 3000 });
-  });
-
-  test('empty catalog shows guidance message in selector', async ({ page }) => {
-    await page.goto('/');
-    await page.locator('.catalog-selector-input').first().click();
-    await expect(page.locator('.catalog-selector-empty').first()).toBeVisible({ timeout: 2000 });
-    await expect(page.locator('.catalog-selector-empty').first()).toContainText('Catalogul este gol');
-  });
-
-  test('remove chip deselects template', async ({ page, request }) => {
-    await createTemplate(request, 'Place card');
-
-    await page.goto('/');
-    const selectorInput = page.locator('.catalog-selector-input').first();
-    await selectorInput.click();
-    await page.locator('.catalog-selector-dropdown').first().locator('.catalog-selector-option', { hasText: 'Place card' }).click();
-
-    await expect(page.locator('.catalog-chip').first()).toBeVisible({ timeout: 2000 });
-    await page.locator('.catalog-chip-remove').first().click();
-    await expect(page.locator('.catalog-chip')).toHaveCount(0);
+    const item = page.getByTestId('add-product-item').filter({ hasText: 'Place card' });
+    await expect(item).toBeVisible();
+    await item.getByRole('button', { name: /Elimină/ }).click();
+    await expect(page.getByTestId('add-product-item')).toHaveCount(0);
   });
 });
