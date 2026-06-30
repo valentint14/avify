@@ -5,6 +5,7 @@ export const NAV_LINKS = [
   { label: 'Comenzi', href: '/' },
   { label: 'Catalog Produse', href: '/catalog' },
   { label: 'Stoc Materiale', href: '/stoc-materiale' },
+  { label: 'Dashboard', href: '/dashboard' },
 ];
 
 // A link is active only on an exact pathname match. Partial matches are
