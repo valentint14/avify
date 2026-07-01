@@ -25,6 +25,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import DateInput from '@/components/ui/date-input';
 
 const CONTACT_PLATFORMS = ['Facebook', 'Instagram', 'TikTok', 'Telefon', 'Email'];
 const NONE = '__none__';
@@ -66,7 +67,7 @@ export default function EditOrderModal({ orderId, onClose, onSaved, onDelete }) 
           const platform = order.contactPlatform ?? '';
           setCustomPlatform(platform !== '' && !CONTACT_PLATFORMS.includes(platform));
           setOrderFields({
-            client: order.client ?? '',
+            client: order.client || order.name || '',
             receptionDate: order.receptionDate ?? '',
             advance: order.advance ? String(order.advance) : '',
             county: order.county ?? '',
@@ -238,15 +239,15 @@ export default function EditOrderModal({ orderId, onClose, onSaved, onDelete }) 
                 </div>
                 <div className={fieldCls}>
                   <Label htmlFor="ord-reception">Dată primire</Label>
-                  <Input id="ord-reception" type="date" value={orderFields.receptionDate} onChange={(e) => setField('receptionDate', e.target.value)} disabled={saving} />
+                  <DateInput id="ord-reception" value={orderFields.receptionDate} onChange={(v) => setField('receptionDate', v)} disabled={saving} />
                 </div>
                 <div className={fieldCls}>
                   <Label htmlFor="ord-event">Dată eveniment</Label>
-                  <Input id="ord-event" type="date" value={orderFields.eventDate} onChange={(e) => setField('eventDate', e.target.value)} disabled={saving} />
+                  <DateInput id="ord-event" value={orderFields.eventDate} onChange={(v) => setField('eventDate', v)} disabled={saving} />
                 </div>
                 <div className={fieldCls}>
                   <Label htmlFor="ord-delivery">Termen livrare</Label>
-                  <Input id="ord-delivery" type="date" value={orderFields.deliveryDate} onChange={(e) => setField('deliveryDate', e.target.value)} disabled={saving} />
+                  <DateInput id="ord-delivery" value={orderFields.deliveryDate} onChange={(v) => setField('deliveryDate', v)} disabled={saving} />
                 </div>
                 <div className={fieldCls}>
                   <Label htmlFor="ord-advance">Avans (RON)</Label>

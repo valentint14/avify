@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { formatDate } from '@/lib/utils';
 
 const STATUS_LABELS = {
   de_realizat: 'De realizat',
@@ -74,8 +75,8 @@ export default function OrderDetailDialog({ event, onClose }) {
           <MetaRow label="Client" value={order?.client} />
           <MetaRow label="Județ" value={order?.county} />
           <MetaRow label="Platformă" value={order?.contactPlatform} />
-          <MetaRow label="Dată eveniment" value={order?.eventDate} />
-          <MetaRow label="Termen livrare" value={order?.deliveryDate} />
+          <MetaRow label="Dată eveniment" value={formatDate(order?.eventDate)} />
+          <MetaRow label="Termen livrare" value={formatDate(order?.deliveryDate)} />
           <MetaRow label="Avans" value={order?.advance > 0 ? `${order.advance} RON` : null} />
           <MetaRow label="Profit" value={order?.profit > 0 ? `${order.profit} RON` : null} />
           <MetaRow label="Colectat" value={order != null ? (order.collected ? 'Da' : 'Nu') : null} />

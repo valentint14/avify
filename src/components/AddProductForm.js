@@ -121,7 +121,7 @@ export default function AddProductForm({ orderId, onProductAdded, excludedTempla
       ...prev,
       ...picks.map((t) => {
         keySeq += 1;
-        return { key: keySeq, name: t.name, templateId: t.id, quantity: 1, additionalInfo: '' };
+        return { key: keySeq, name: t.name, templateId: t.id, quantity: 1, unitPrice: '', additionalInfo: '' };
       }),
     ]);
     setError('');
@@ -131,7 +131,7 @@ export default function AddProductForm({ orderId, onProductAdded, excludedTempla
     const name = adhocName.trim();
     if (!name) return;
     keySeq += 1;
-    setItems((prev) => [...prev, { key: keySeq, name, templateId: null, quantity: 1, additionalInfo: '' }]);
+    setItems((prev) => [...prev, { key: keySeq, name, templateId: null, quantity: 1, unitPrice: '', additionalInfo: '' }]);
     setAdhocName('');
     setError('');
   }
@@ -162,11 +162,15 @@ export default function AddProductForm({ orderId, onProductAdded, excludedTempla
     setSubmitting(true);
     try {
       for (const it of items) {
+        const parsedPrice = it.unitPrice !== '' ? Number(it.unitPrice) : null;
         const body = {
           orderId,
           name: it.name,
           quantity: Math.trunc(Number(it.quantity)),
           additionalInfo: it.additionalInfo.trim() || null,
+          ...(parsedPrice !== null && Number.isFinite(parsedPrice) && parsedPrice >= 0
+            ? { unitPrice: parsedPrice }
+            : {}),
         };
         if (it.templateId) body.templateId = it.templateId;
         const res = await fetch('/api/products', {
@@ -249,7 +253,7 @@ export default function AddProductForm({ orderId, onProductAdded, excludedTempla
                     ×
                   </button>
                 </div>
-                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
                   <div className="flex flex-col gap-1">
                     <label className="text-xs text-muted-foreground" htmlFor={`qty-${it.key}`}>
                       Cantitate
@@ -264,6 +268,21 @@ export default function AddProductForm({ orderId, onProductAdded, excludedTempla
                     />
                   </div>
                   <div className="flex flex-col gap-1">
+                    <label className="text-xs text-muted-foreground" htmlFor={`price-${it.key}`}>
+                      Preț/buc (RON)
+                    </label>
+                    <Input
+                      id={`price-${it.key}`}
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      placeholder="0.00"
+                      value={it.unitPrice}
+                      onChange={(e) => setItemField(it.key, 'unitPrice', e.target.value)}
+                      disabled={submitting}
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1 sm:col-span-1">
                     <label className="text-xs text-muted-foreground" htmlFor={`info-${it.key}`}>
                       Informații suplimentare
                     </label>

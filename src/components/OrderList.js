@@ -6,7 +6,7 @@ import AddOrderForm from './AddOrderForm.js';
 import OrderFilters from './OrderFilters.js';
 import ProductBoard from './ProductBoard.js';
 import EditOrderModal from './EditOrderModal.js';
-import { filterOrders, deriveOptions, DEFAULT_FILTERS } from '../lib/orderFilters.js';
+import { filterOrders, sortOrders, getSortBadge, deriveOptions, DEFAULT_FILTERS } from '../lib/orderFilters.js';
 
 export default function OrderList({ initialOrders }) {
   const [orders, setOrders] = useState(initialOrders);
@@ -17,7 +17,10 @@ export default function OrderList({ initialOrders }) {
 
   const countyOptions = useMemo(() => deriveOptions(orders, 'county'), [orders]);
   const platformOptions = useMemo(() => deriveOptions(orders, 'contactPlatform'), [orders]);
-  const filteredOrders = useMemo(() => filterOrders(orders, filterState), [orders, filterState]);
+  const filteredOrders = useMemo(
+    () => sortOrders(filterOrders(orders, filterState), filterState.sort),
+    [orders, filterState]
+  );
 
   function handleFilterChange(key, value) {
     setFilterState((prev) => ({ ...prev, [key]: value }));
@@ -100,6 +103,7 @@ export default function OrderList({ initialOrders }) {
             isExpanded={expandedOrderIds.has(order.id)}
             onToggle={handleToggle}
             onEdit={setEditingOrderId}
+            sortBadge={getSortBadge(filterState.sort, order)}
           />
           {expandedOrderIds.has(order.id) && (
             <ProductBoard

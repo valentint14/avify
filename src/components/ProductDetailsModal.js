@@ -8,6 +8,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { ATTACHMENT_EXTENSIONS } from '../lib/constants.js';
+import { formatDateTime } from '../lib/utils.js';
 
 const ACCEPTED_MIME = '.pdf,.png,.jpg,.jpeg,.webp';
 
@@ -149,10 +150,7 @@ export default function ProductDetailsModal({ product: initialProduct, revisionH
                 <div key={i} className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2">
                   <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 mb-1">
                     <span className="text-xs text-amber-500">
-                      {new Date(entry.createdAt).toLocaleString('ro-RO', {
-                        day: '2-digit', month: '2-digit', year: 'numeric',
-                        hour: '2-digit', minute: '2-digit',
-                      })}
+                      {formatDateTime(entry.createdAt)}
                     </span>
                     {entry.fileName && (
                       <span className="text-xs text-amber-400 truncate max-w-[180px]" title={entry.fileName}>

@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
-export default function OrderRow({ order, isExpanded, onToggle, onEdit }) {
+export default function OrderRow({ order, isExpanded, onToggle, onEdit, sortBadge }) {
   const statusLabel = order.status === 'finalizata' ? 'Finalizată' : 'În progres';
   const statusVariant = order.status === 'finalizata' ? 'status-finalizata' : 'status-in-progres';
   const [detailsOpen, setDetailsOpen] = useState(false);
@@ -74,6 +74,11 @@ export default function OrderRow({ order, isExpanded, onToggle, onEdit }) {
         <Badge variant={statusVariant} data-testid="order-status" data-status={order.status}>
           {statusLabel}
         </Badge>
+        {sortBadge && (
+          <Badge variant="muted" className="hidden sm:inline-flex">
+            {sortBadge.label}: {sortBadge.value}
+          </Badge>
+        )}
         <button
           type="button"
           className="shrink-0 rounded-md p-1 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"

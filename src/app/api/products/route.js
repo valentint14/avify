@@ -1,4 +1,4 @@
-import { getProductsByOrder, createProduct, createProductFromTemplate } from '../../../lib/products.js';
+import { getProductsByOrder, createProduct, createProductFromTemplate, updateProduct } from '../../../lib/products.js';
 import { getAllWithStatus } from '../../../lib/orders.js';
 
 export async function GET(request) {
@@ -33,6 +33,9 @@ export async function POST(request) {
     }
     const additionalInfo = typeof body.additionalInfo === 'string' ? body.additionalInfo : null;
 
+    const rawPrice = body.unitPrice !== undefined ? Number(body.unitPrice) : null;
+    const unitPrice = rawPrice !== null && Number.isFinite(rawPrice) && rawPrice >= 0 ? rawPrice : null;
+
     // Verify order exists
     const orders = getAllWithStatus();
     if (!orders.find((o) => o.id === orderId)) {
@@ -40,9 +43,12 @@ export async function POST(request) {
     }
 
     const templateId = typeof body.templateId === 'string' ? body.templateId : null;
-    const product = templateId
+    let product = templateId
       ? createProductFromTemplate(orderId, templateId, quantity, additionalInfo) ?? createProduct(orderId, name, null, quantity, additionalInfo)
       : createProduct(orderId, name, null, quantity, additionalInfo);
+    if (product && unitPrice !== null) {
+      product = updateProduct(product.id, { unitPrice }) ?? product;
+    }
     return Response.json({ product }, { status: 201 });
   } catch (err) {
     if (err?.message?.includes('UNIQUE constraint failed')) {
