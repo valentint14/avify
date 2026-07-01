@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { MoreHorizontal, ChevronUp, Link, Copy, Check } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -13,6 +13,17 @@ export default function OrderRow({ order, isExpanded, onToggle, onEdit }) {
   const [approvalLink, setApprovalLink] = useState(null);
   const [linkLoading, setLinkLoading] = useState(false);
   const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    fetch(`/api/orders/${order.id}/approval-token`)
+      .then((r) => r.ok ? r.json() : null)
+      .then((data) => {
+        if (data?.token) {
+          setApprovalLink(`${window.location.origin}/aprobare/${data.token.id}`);
+        }
+      })
+      .catch(() => {});
+  }, [order.id]);
 
   async function handleGenerateLink(e) {
     e.stopPropagation();

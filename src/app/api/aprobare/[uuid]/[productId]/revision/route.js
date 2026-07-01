@@ -14,6 +14,9 @@ export async function POST(request, { params }) {
     if (!result) {
       return Response.json({ error: 'Link de aprobare sau produs negăsit.' }, { status: 404 });
     }
+    if (result.alreadyApproved) {
+      return Response.json({ error: 'Produsul a fost deja aprobat.' }, { status: 409 });
+    }
     return Response.json(result);
   } catch {
     return Response.json({ error: 'Eroare internă de server.' }, { status: 500 });

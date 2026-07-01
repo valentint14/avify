@@ -16,16 +16,25 @@ function fileTypeFrom(ext) {
   return 'other';
 }
 
-function createApprovalToken(orderId) {
+function getOrCreateApprovalToken(orderId) {
   const db = getDb();
+  const existing = db
+    .prepare('SELECT id, order_id, created_at FROM approval_tokens WHERE order_id = ? ORDER BY created_at ASC LIMIT 1')
+    .get(orderId);
+  if (existing) return { id: existing.id, orderId: existing.order_id, createdAt: existing.created_at };
   const id = crypto.randomUUID();
   const now = new Date().toISOString();
-  db.prepare('INSERT INTO approval_tokens (id, order_id, created_at) VALUES (?, ?, ?)').run(
-    id,
-    orderId,
-    now
-  );
+  db.prepare('INSERT INTO approval_tokens (id, order_id, created_at) VALUES (?, ?, ?)').run(id, orderId, now);
   return { id, orderId, createdAt: now };
+}
+
+function getApprovalToken(orderId) {
+  const db = getDb();
+  const row = db
+    .prepare('SELECT id, order_id, created_at FROM approval_tokens WHERE order_id = ? ORDER BY created_at ASC LIMIT 1')
+    .get(orderId);
+  if (!row) return null;
+  return { id: row.id, orderId: row.order_id, createdAt: row.created_at };
 }
 
 function getApprovalPageData(tokenId) {
@@ -115,6 +124,11 @@ function requestRevision(tokenId, productId, feedback) {
     .get(productId, token.order_id);
   if (!product) return null;
 
+  const existingApproval = db
+    .prepare('SELECT id FROM product_approvals WHERE token_id = ? AND product_id = ?')
+    .get(tokenId, productId);
+  if (existingApproval) return { alreadyApproved: true };
+
   const fileName = product.graphic_file_path
     ? product.graphic_file_path.split('/').pop()
     : null;
@@ -163,7 +177,8 @@ function getRevisionStatusForOrder(orderId) {
 }
 
 module.exports = {
-  createApprovalToken,
+  getOrCreateApprovalToken,
+  getApprovalToken,
   getApprovalPageData,
   approveProduct,
   requestRevision,

@@ -48,6 +48,8 @@ export default function ApprovalClientView({ order, products, tokenId }) {
       if (res.ok) {
         setSubmittedRevisions((prev) => new Set([...prev, productId]));
         setRevisionTexts((prev) => ({ ...prev, [productId]: '' }));
+      } else if (res.status === 409) {
+        setApprovedIds((prev) => new Set([...prev, productId]));
       } else {
         setRevisionErrors((prev) => ({ ...prev, [productId]: 'Eroare la trimitere. Încercați din nou.' }));
       }

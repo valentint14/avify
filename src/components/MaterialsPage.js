@@ -74,8 +74,8 @@ export default function MaterialsPage({ initialMaterials }) {
   }
 
   return (
-    <div className="mx-auto flex max-w-4xl flex-col gap-4 p-6">
-      <div className="flex items-start justify-between gap-4">
+    <div className="mx-auto flex max-w-6xl flex-col gap-4 p-6">
+      <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="flex flex-col gap-1">
           <h1 className="text-xl font-bold tracking-tight text-foreground">Stoc Materiale</h1>
           <p className="text-sm text-muted-foreground">
@@ -146,40 +146,41 @@ export default function MaterialsPage({ initialMaterials }) {
             <div
               key={m.id}
               className={cn(
-                'flex items-center gap-4 rounded-md border bg-card p-3 shadow-sm',
+                'flex flex-col gap-2 rounded-md border bg-card p-3 shadow-sm sm:flex-row sm:items-center sm:gap-4',
                 isLowStock(m) ? 'border-warn' : 'border-border'
               )}
               data-testid="material-row"
             >
               <span className="flex-1 font-medium text-foreground">{m.name}</span>
-              <span className="whitespace-nowrap text-sm text-muted-foreground">
-                {m.currentStock} {m.unit ?? ''} · minim {m.minStock}
-              </span>
-              {isLowStock(m) && <Badge variant="warn">Sub minim</Badge>}
-
-              <div className="flex shrink-0 gap-1">
-                <Button variant="outline" size="sm" onClick={() => setEditingId(m.id)}>
-                  Editează
-                </Button>
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button variant="outline" size="sm" className="text-destructive">
-                      Șterge
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Ștergi „{m.name}”?</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Materialul va fi eliminat și scos din rețetele care îl folosesc.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Anulează</AlertDialogCancel>
-                      <AlertDialogAction onClick={() => handleDelete(m.id)}>Șterge</AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-sm text-muted-foreground">
+                  {m.currentStock} {m.unit ?? ''} · minim {m.minStock}
+                </span>
+                {isLowStock(m) && <Badge variant="warn">Sub minim</Badge>}
+                <div className="ml-auto flex shrink-0 gap-1 sm:ml-0">
+                  <Button variant="outline" size="sm" onClick={() => setEditingId(m.id)}>
+                    Editează
+                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="outline" size="sm" className="text-destructive">
+                        Șterge
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Ștergi &bdquo;{m.name}&rdquo;?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Materialul va fi eliminat și scos din rețetele care îl folosesc.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Anulează</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => handleDelete(m.id)}>Șterge</AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
               </div>
             </div>
           )

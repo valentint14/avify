@@ -71,7 +71,7 @@ export default function CatalogPage({ initialTemplates }) {
   }
 
   return (
-    <div className="mx-auto flex max-w-4xl flex-col gap-4 p-6">
+    <div className="mx-auto flex max-w-6xl flex-col gap-4 p-6">
       <div className="flex flex-col gap-1">
         <h1 className="text-xl font-bold tracking-tight text-foreground">Catalog Produse</h1>
         <p className="text-sm text-muted-foreground">
