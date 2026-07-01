@@ -46,20 +46,20 @@ test.describe('US3 — Drag-and-drop products', () => {
     await page.goto('/');
     await orderRow(page, 'DnD Move Test').click();
 
-    const deFacutColumn = page.getByTestId('product-column').nth(0);
-    const printareColumn = page.getByTestId('product-column').nth(3);
+    const deRealizatColumn = page.getByTestId('product-column').nth(0);
+    const realizatColumn = page.getByTestId('product-column').nth(2);
 
-    await expect(deFacutColumn.getByTestId('product-card')).toHaveCount(1, { timeout: 5000 });
+    await expect(deRealizatColumn.getByTestId('product-card')).toHaveCount(1, { timeout: 5000 });
 
-    await dragToColumn(page, '[data-testid="product-column"]:nth-child(1) [data-testid="product-card"]', '[data-testid="product-column"]:nth-child(4)');
+    await dragToColumn(page, '[data-testid="product-column"]:nth-child(1) [data-testid="product-card"]', '[data-testid="product-column"]:nth-child(3)');
 
-    await expect(printareColumn.getByTestId('product-card')).toHaveCount(1, { timeout: 3000 });
-    await expect(deFacutColumn.getByTestId('product-card')).toHaveCount(0);
+    await expect(realizatColumn.getByTestId('product-card')).toHaveCount(1, { timeout: 3000 });
+    await expect(deRealizatColumn.getByTestId('product-card')).toHaveCount(0);
 
     // Reload and verify persistence
     await page.reload();
     await orderRow(page, 'DnD Move Test').click();
-    await expect(page.getByTestId('product-column').nth(3).getByTestId('product-card')).toHaveCount(1, { timeout: 5000 });
+    await expect(page.getByTestId('product-column').nth(2).getByTestId('product-card')).toHaveCount(1, { timeout: 5000 });
   });
 
   test('drop on same column does not move the card', async ({ page, request }) => {

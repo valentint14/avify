@@ -54,7 +54,7 @@ test.describe('US4 — Auto-complete order', () => {
     await orderRow(page, 'Auto Finalizata Test').click();
     await expect(page.getByTestId('product-column').nth(0).getByTestId('product-card')).toHaveCount(1, { timeout: 5000 });
 
-    await dragToColumn(page, '[data-testid="product-column"]:nth-child(1) [data-testid="product-card"]', '[data-testid="product-column"]:nth-child(6)');
+    await dragToColumn(page, '[data-testid="product-column"]:nth-child(1) [data-testid="product-card"]', '[data-testid="product-column"]:nth-child(3)');
 
     await expect(statusBadge(page, 'Auto Finalizata Test', 'finalizata')).toBeVisible({ timeout: 4000 });
     await expect(statusBadge(page, 'Auto Finalizata Test', 'in_progres')).not.toBeVisible();
@@ -64,16 +64,16 @@ test.describe('US4 — Auto-complete order', () => {
     const order = await createOrder(request, 'Revert Test Order');
     const product = await createProduct(request, order.id, 'Produs B');
 
-    // Pre-set product to gata via API
-    await request.patch(`/api/products/${product.id}`, { data: { status: 'gata' } });
+    // Pre-set product to realizat via API
+    await request.patch(`/api/products/${product.id}`, { data: { status: 'realizat' } });
 
     await page.goto('/');
     await expect(statusBadge(page, 'Revert Test Order', 'finalizata')).toBeVisible();
 
     await orderRow(page, 'Revert Test Order').click();
-    await expect(page.getByTestId('product-column').nth(5).getByTestId('product-card')).toHaveCount(1, { timeout: 5000 });
+    await expect(page.getByTestId('product-column').nth(2).getByTestId('product-card')).toHaveCount(1, { timeout: 5000 });
 
-    await dragToColumn(page, '[data-testid="product-column"]:nth-child(6) [data-testid="product-card"]', '[data-testid="product-column"]:nth-child(1)');
+    await dragToColumn(page, '[data-testid="product-column"]:nth-child(3) [data-testid="product-card"]', '[data-testid="product-column"]:nth-child(1)');
 
     await expect(statusBadge(page, 'Revert Test Order', 'in_progres')).toBeVisible({ timeout: 4000 });
     await expect(statusBadge(page, 'Revert Test Order', 'finalizata')).not.toBeVisible();
@@ -88,15 +88,15 @@ test.describe('US4 — Auto-complete order', () => {
     await orderRow(page, 'Multi Gata Test').click();
     await expect(page.getByTestId('product-column').nth(0).getByTestId('product-card')).toHaveCount(2, { timeout: 5000 });
 
-    // Move first product to Gata
-    await dragToColumn(page, '[data-testid="product-column"]:nth-child(1) [data-testid="product-card"]', '[data-testid="product-column"]:nth-child(6)');
+    // Move first product to Realizat
+    await dragToColumn(page, '[data-testid="product-column"]:nth-child(1) [data-testid="product-card"]', '[data-testid="product-column"]:nth-child(3)');
     await page.waitForTimeout(500);
 
     // Still in_progres
     await expect(statusBadge(page, 'Multi Gata Test', 'in_progres')).toBeVisible();
 
-    // Move second product to Gata
-    await dragToColumn(page, '[data-testid="product-column"]:nth-child(1) [data-testid="product-card"]', '[data-testid="product-column"]:nth-child(6)');
+    // Move second product to Realizat
+    await dragToColumn(page, '[data-testid="product-column"]:nth-child(1) [data-testid="product-card"]', '[data-testid="product-column"]:nth-child(3)');
 
     await expect(statusBadge(page, 'Multi Gata Test', 'finalizata')).toBeVisible({ timeout: 4000 });
   });

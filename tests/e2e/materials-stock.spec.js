@@ -123,13 +123,13 @@ test.describe('Feature 008 — Materials stock & recipes', () => {
     const { product } = await addProduct(request, order.id, 'Invitație', template.id, 30);
 
     // Complete the order: move the product to "gata" (triggers deduction)
-    await request.patch(`/api/products/${product.id}`, { data: { status: 'gata' } });
+    await request.patch(`/api/products/${product.id}`, { data: { status: 'realizat' } });
 
     await page.goto('/stoc-materiale');
     await expect(materialRow(page, 'Carton')).toContainText('70'); // 100 - 30×1
 
     // Re-completing (idempotent): patch status again → still 70
-    await request.patch(`/api/products/${product.id}`, { data: { status: 'gata' } });
+    await request.patch(`/api/products/${product.id}`, { data: { status: 'realizat' } });
     await page.reload();
     await expect(materialRow(page, 'Carton')).toContainText('70');
 

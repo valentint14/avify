@@ -59,11 +59,11 @@ describe('GET /api/orders', () => {
     expect(order).toHaveProperty('createdAt');
   });
 
-  it('returns finalizata status when all products are gata', async () => {
+  it('returns finalizata status when all products are realizat', async () => {
     const createRes = await callPost({ name: 'Done Order' });
     const { order } = await createRes.json();
     db.prepare("INSERT INTO products (id, order_id, name, status, created_at) VALUES (?, ?, ?, ?, ?)").run(
-      'p1', order.id, 'Invitații', 'gata', new Date().toISOString()
+      'p1', order.id, 'Invitații', 'realizat', new Date().toISOString()
     );
     const getRes = await callGet();
     const { orders } = await getRes.json();

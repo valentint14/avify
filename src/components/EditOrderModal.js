@@ -1,7 +1,7 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -212,17 +212,18 @@ export default function EditOrderModal({ orderId, onClose, onSaved, onDelete }) 
   return (
     <Dialog open onOpenChange={(o) => { if (!o) onClose(); }}>
       <DialogContent
-        className="max-h-[85vh] gap-0 overflow-y-auto sm:max-w-2xl"
+        className="flex max-h-[85vh] flex-col gap-0 p-0 sm:max-w-2xl"
         data-testid="edit-order-modal"
       >
-        <DialogHeader>
+        <DialogHeader className="shrink-0 border-b border-border px-6 pb-4 pt-6 pr-14">
           <DialogTitle>Editează comanda</DialogTitle>
         </DialogHeader>
 
+        <div className="flex-1 overflow-y-auto px-6 py-4">
         {loading && <p className="py-6 text-sm text-muted-foreground">Se încarcă…</p>}
 
         {!loading && (
-          <div className="flex flex-col gap-6 py-2">
+          <div className="flex flex-col gap-6">
             {/* Order details */}
             <section>
               <h3 className="mb-3 text-sm font-semibold text-foreground">Detalii comandă</h3>
@@ -343,8 +344,9 @@ export default function EditOrderModal({ orderId, onClose, onSaved, onDelete }) 
             {error && <p className="text-sm text-destructive">{error}</p>}
           </div>
         )}
+        </div>
 
-        <DialogFooter className="border-t border-border pt-4 sm:justify-between">
+        <div className="shrink-0 flex flex-col gap-2 border-t border-border px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button variant="outline" className="text-destructive" data-testid="order-delete" disabled={busy || loading}>
@@ -354,7 +356,7 @@ export default function EditOrderModal({ orderId, onClose, onSaved, onDelete }) 
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogTitle>
-                  Ștergi comanda {orderName ? `„${orderName}”` : 'aceasta'}?
+                  Ștergi comanda {orderName ? `„${orderName}"` : 'aceasta'}?
                 </AlertDialogTitle>
                 <AlertDialogDescription>Toate produsele vor fi șterse.</AlertDialogDescription>
               </AlertDialogHeader>
@@ -367,13 +369,13 @@ export default function EditOrderModal({ orderId, onClose, onSaved, onDelete }) 
             </AlertDialogContent>
           </AlertDialog>
 
-          <div className="flex gap-2">
-            <Button variant="secondary" onClick={onClose} disabled={busy}>Anulează</Button>
+          <div className="flex flex-col gap-2 sm:ml-auto sm:flex-row">
+            <Button variant="outline" onClick={onClose} disabled={busy}>Anulează</Button>
             <Button onClick={handleSave} disabled={busy || loading} data-testid="order-save">
               {saving ? 'Se salvează…' : 'Salvează'}
             </Button>
           </div>
-        </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>
   );

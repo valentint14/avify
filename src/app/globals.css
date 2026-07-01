@@ -93,12 +93,18 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  *::-webkit-scrollbar {
+    display: none;
   }
   body {
     @apply bg-background text-foreground;
     font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
   }
 }
+
 
 /* Honour users who prefer reduced motion. */
 @media (prefers-reduced-motion: reduce) {

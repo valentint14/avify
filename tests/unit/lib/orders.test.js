@@ -35,10 +35,10 @@ describe('getAllWithStatus', () => {
   it('returns in_progres for order with mixed-status products', () => {
     const order = createOrder('Botez Test');
     db.prepare("INSERT INTO products (id, order_id, name, status, created_at) VALUES (?, ?, ?, ?, ?)").run(
-      'p1', order.id, 'Invitații', 'gata', new Date().toISOString()
+      'p1', order.id, 'Invitații', 'realizat', new Date().toISOString()
     );
     db.prepare("INSERT INTO products (id, order_id, name, status, created_at) VALUES (?, ?, ?, ?, ?)").run(
-      'p2', order.id, 'Meniu', 'printare', new Date().toISOString()
+      'p2', order.id, 'Meniu', 'in_realizare', new Date().toISOString()
     );
     const [found] = getAllWithStatus();
     expect(found.status).toBe('in_progres');
@@ -46,13 +46,13 @@ describe('getAllWithStatus', () => {
     expect(found.doneCount).toBe(1);
   });
 
-  it('returns finalizata when all products are in gata', () => {
-    const order = createOrder('Gata Test');
+  it('returns finalizata when all products are in realizat', () => {
+    const order = createOrder('Realizat Test');
     db.prepare("INSERT INTO products (id, order_id, name, status, created_at) VALUES (?, ?, ?, ?, ?)").run(
-      'p3', order.id, 'Invitații', 'gata', new Date().toISOString()
+      'p3', order.id, 'Invitații', 'realizat', new Date().toISOString()
     );
     db.prepare("INSERT INTO products (id, order_id, name, status, created_at) VALUES (?, ?, ?, ?, ?)").run(
-      'p4', order.id, 'Meniu', 'gata', new Date().toISOString()
+      'p4', order.id, 'Meniu', 'realizat', new Date().toISOString()
     );
     const [found] = getAllWithStatus();
     expect(found.status).toBe('finalizata');
@@ -176,10 +176,10 @@ describe('order total', () => {
     const order = createOrder('Total Test');
     db.prepare(
       'INSERT INTO products (id, order_id, name, status, quantity, unit_price, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)'
-    ).run('tp1', order.id, 'Invitații', 'de_facut', 3, 50, new Date().toISOString());
+    ).run('tp1', order.id, 'Invitații', 'de_realizat', 3, 50, new Date().toISOString());
     db.prepare(
       'INSERT INTO products (id, order_id, name, status, quantity, unit_price, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)'
-    ).run('tp2', order.id, 'Meniuri', 'de_facut', 2, 120, new Date().toISOString());
+    ).run('tp2', order.id, 'Meniuri', 'de_realizat', 2, 120, new Date().toISOString());
     const found = getOrderById(order.id);
     expect(found.total).toBe(390); // 3×50 + 2×120
   });
@@ -188,7 +188,7 @@ describe('order total', () => {
     const order = createOrder('Null Price');
     db.prepare(
       'INSERT INTO products (id, order_id, name, status, quantity, created_at) VALUES (?, ?, ?, ?, ?, ?)'
-    ).run('tp3', order.id, 'No Price', 'de_facut', 5, new Date().toISOString());
+    ).run('tp3', order.id, 'No Price', 'de_realizat', 5, new Date().toISOString());
     expect(getOrderById(order.id).total).toBe(0);
   });
 });
@@ -208,7 +208,7 @@ describe('deleteOrder', () => {
   it('cascades to delete associated products', () => {
     const order = createOrder('Cascade Test');
     db.prepare("INSERT INTO products (id, order_id, name, status, created_at) VALUES (?, ?, ?, ?, ?)").run(
-      'pc1', order.id, 'Invitații', 'de_facut', new Date().toISOString()
+      'pc1', order.id, 'Invitații', 'de_realizat', new Date().toISOString()
     );
     deleteOrder(order.id);
     const products = db.prepare('SELECT * FROM products WHERE order_id = ?').all(order.id);

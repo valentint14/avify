@@ -6,7 +6,7 @@ import KpiCard from '@/components/dashboard/KpiCard';
 import { getMonthlyProfitData, getTopProducts, getDashboardKPIs } from '@/lib/analytics';
 
 export const metadata = {
-  title: 'Dashboard — Avify',
+  title: 'Statistici — Avify',
 };
 
 export const dynamic = 'force-dynamic';
@@ -28,31 +28,31 @@ async function DashboardData() {
 
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6 p-6">
-      <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
+      <h1 className="text-2xl font-bold tracking-tight">Statistici</h1>
 
       <section aria-label="KPI-uri" className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <KpiCard label="Total Comenzi" value={kpis.totalOrders} />
+        <KpiCard label="Total comenzi" value={kpis.totalOrders} />
         <KpiCard
-          label="Venituri Totale"
+          label="Venituri totale"
           value={kpis.totalRevenue.toFixed(2)}
           unit="RON"
         />
         <KpiCard
-          label="Profit Total"
+          label="Profit total"
           value={kpis.totalProfit.toFixed(2)}
           unit="RON"
         />
       </section>
 
       <section aria-label="Profit lunar">
-        <h2 className="mb-4 text-lg font-semibold">Evoluție Profit Lunar</h2>
+        <h2 className="mb-4 text-lg font-semibold">Evoluție profit lunar</h2>
         <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
           <MonthlyProfitChart data={monthly} />
         </div>
       </section>
 
       <section aria-label="Top produse">
-        <h2 className="mb-4 text-lg font-semibold">Cele Mai Vândute Produse</h2>
+        <h2 className="mb-4 text-lg font-semibold">Cele mai vândute produse</h2>
         <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
           <TopProductsChart data={products} />
         </div>

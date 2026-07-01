@@ -18,11 +18,11 @@ const DERIVED_STATUS_SQL = `
     o.collected,
     o.delivered,
     COUNT(p.id)                                        AS product_count,
-    COUNT(CASE WHEN p.status = 'gata' THEN 1 END)     AS done_count,
+    COUNT(CASE WHEN p.status = 'realizat' THEN 1 END)  AS done_count,
     SUM(COALESCE(p.quantity, 0) * COALESCE(p.unit_price, 0)) AS total,
     CASE
       WHEN COUNT(p.id) > 0
-       AND COUNT(CASE WHEN p.status != 'gata' THEN 1 END) = 0
+       AND COUNT(CASE WHEN p.status != 'realizat' THEN 1 END) = 0
       THEN 'finalizata'
       ELSE 'in_progres'
     END                                                AS status

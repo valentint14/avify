@@ -86,7 +86,7 @@ describe('POST /api/products', () => {
     expect(product.id).toBeTruthy();
     expect(product.orderId).toBe(orderId);
     expect(product.name).toBe('Meniu');
-    expect(product.status).toBe('de_facut');
+    expect(product.status).toBe('de_realizat');
   });
 
   it('returns 400 when name is empty', async () => {
@@ -141,10 +141,10 @@ describe('POST /api/products', () => {
 describe('PATCH /api/products/:id', () => {
   it('updates status and returns 200 with updated product', async () => {
     const { product: created } = await (await callPostProduct({ orderId, name: 'Invitații' })).json();
-    const res = await callPatch(created.id, { status: 'printare' });
+    const res = await callPatch(created.id, { status: 'in_realizare' });
     expect(res.status).toBe(200);
     const { product } = await res.json();
-    expect(product.status).toBe('printare');
+    expect(product.status).toBe('in_realizare');
     expect(product.id).toBe(created.id);
   });
 
@@ -157,12 +157,12 @@ describe('PATCH /api/products/:id', () => {
   });
 
   it('returns 404 for unknown product id', async () => {
-    const res = await callPatch('nonexistent', { status: 'gata' });
+    const res = await callPatch('nonexistent', { status: 'realizat' });
     expect(res.status).toBe(404);
   });
 
-  it('accepts all 6 valid statuses', async () => {
-    const validStatuses = ['de_facut', 'in_design', 'validare_client', 'printare', 'asamblare', 'gata'];
+  it('accepts all 3 valid statuses', async () => {
+    const validStatuses = ['de_realizat', 'in_realizare', 'realizat'];
     for (const status of validStatuses) {
       const { product: created } = await (await callPostProduct({ orderId, name: `P-${status}` })).json();
       const res = await callPatch(created.id, { status });
@@ -200,10 +200,10 @@ describe('PATCH /api/products/:id', () => {
 
   it('updates both status and quantity in one request', async () => {
     const { product: created } = await (await callPostProduct({ orderId, name: 'Both Fields' })).json();
-    const res = await callPatch(created.id, { status: 'printare', quantity: 2 });
+    const res = await callPatch(created.id, { status: 'in_realizare', quantity: 2 });
     expect(res.status).toBe(200);
     const { product } = await res.json();
-    expect(product.status).toBe('printare');
+    expect(product.status).toBe('in_realizare');
     expect(product.quantity).toBe(2);
   });
 });

@@ -45,7 +45,7 @@ describe('getProductsByOrder', () => {
     expect(p).toHaveProperty('id');
     expect(p).toHaveProperty('orderId', order.id);
     expect(p).toHaveProperty('name', 'Program');
-    expect(p).toHaveProperty('status', 'de_facut');
+    expect(p).toHaveProperty('status', 'de_realizat');
     expect(p).toHaveProperty('createdAt');
   });
 
@@ -68,7 +68,7 @@ describe('createProduct', () => {
     expect(product.id).toMatch(/^[0-9a-f-]{36}$/);
     expect(product.orderId).toBe(order.id);
     expect(product.name).toBe('Invitații');
-    expect(product.status).toBe('de_facut');
+    expect(product.status).toBe('de_realizat');
     expect(product.createdAt).toBeTruthy();
   });
 
@@ -95,7 +95,7 @@ describe('createProductFromTemplate', () => {
     expect(product.name).toBe('Meniu nuntă');
     expect(product.templateId).toBe(template.id);
     expect(product.orderId).toBe(order.id);
-    expect(product.status).toBe('de_facut');
+    expect(product.status).toBe('de_realizat');
   });
 
   it('returns null for unknown template id', () => {
@@ -109,8 +109,8 @@ describe('updateProductStatus', () => {
   it('updates to a valid status', () => {
     const order = createOrder('Update Test');
     const product = createProduct(order.id, 'Meniu');
-    const updated = updateProductStatus(product.id, 'printare');
-    expect(updated.status).toBe('printare');
+    const updated = updateProductStatus(product.id, 'in_realizare');
+    expect(updated.status).toBe('in_realizare');
     expect(updated.id).toBe(product.id);
   });
 
@@ -122,13 +122,13 @@ describe('updateProductStatus', () => {
   });
 
   it('returns null for unknown product id', () => {
-    const result = updateProductStatus('nonexistent-id', 'gata');
+    const result = updateProductStatus('nonexistent-id', 'realizat');
     expect(result).toBeNull();
   });
 
-  it('accepts all 6 valid statuses', () => {
+  it('accepts all 3 valid statuses', () => {
     const order = createOrder('All Statuses');
-    const validStatuses = ['de_facut', 'in_design', 'validare_client', 'printare', 'asamblare', 'gata'];
+    const validStatuses = ['de_realizat', 'in_realizare', 'realizat'];
     for (const status of validStatuses) {
       const product = createProduct(order.id, `Produs ${status}`);
       const updated = updateProductStatus(product.id, status);

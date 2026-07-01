@@ -45,7 +45,7 @@ function deductStockForOrder(orderId) {
   const marker = db.prepare('SELECT stock_deducted FROM orders WHERE id = ?').get(orderId);
   if (marker && marker.stock_deducted) return { deducted: false };
 
-  // status is 'finalizata' only when the order has products and all are 'gata'
+  // status is 'finalizata' only when the order has products and all are 'realizat'
   if (order.status !== 'finalizata') return { deducted: false };
 
   const products = getProductsByOrder(orderId);

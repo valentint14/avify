@@ -18,12 +18,12 @@ test.describe('Navbar — US1: navigate between pages', () => {
     await expect(page.locator(NAV)).toBeVisible();
     await expect(page.locator(NAV).getByText('Avify')).toBeVisible();
     await expect(navLink(page, 'Comenzi')).toBeVisible();
-    await expect(navLink(page, 'Catalog Produse')).toBeVisible();
+    await expect(navLink(page, 'Catalog produse')).toBeVisible();
   });
 
-  test('clicking Catalog Produse navigates to /catalog and Comenzi navigates back', async ({ page }) => {
+  test('clicking Catalog produse navigates to /catalog and Comenzi navigates back', async ({ page }) => {
     await page.goto('/');
-    await navLink(page, 'Catalog Produse').click();
+    await navLink(page, 'Catalog produse').click();
     await expect(page).toHaveURL('/catalog');
 
     await navLink(page, 'Comenzi').click();
@@ -32,15 +32,15 @@ test.describe('Navbar — US1: navigate between pages', () => {
 });
 
 test.describe('Navbar — US2: active page highlight', () => {
-  test('on "/" the Comenzi link is active and Catalog Produse is not', async ({ page }) => {
+  test('on "/" the Comenzi link is active and Catalog produse is not', async ({ page }) => {
     await page.goto('/');
     await expect(navLink(page, 'Comenzi')).toHaveAttribute('aria-current', 'page');
-    await expect(navLink(page, 'Catalog Produse')).not.toHaveAttribute('aria-current', 'page');
+    await expect(navLink(page, 'Catalog produse')).not.toHaveAttribute('aria-current', 'page');
   });
 
-  test('on "/catalog" the Catalog Produse link is active and Comenzi is not', async ({ page }) => {
+  test('on "/catalog" the Catalog produse link is active and Comenzi is not', async ({ page }) => {
     await page.goto('/catalog');
-    await expect(navLink(page, 'Catalog Produse')).toHaveAttribute('aria-current', 'page');
+    await expect(navLink(page, 'Catalog produse')).toHaveAttribute('aria-current', 'page');
     await expect(navLink(page, 'Comenzi')).not.toHaveAttribute('aria-current', 'page');
   });
 });
@@ -67,7 +67,7 @@ test.describe('Navbar — US3: persistent visibility on scroll', () => {
     expect(top).toBeLessThanOrEqual(1);
 
     // And still be usable while scrolled.
-    await navLink(page, 'Catalog Produse').click();
+    await navLink(page, 'Catalog produse').click();
     await expect(page).toHaveURL('/catalog');
   });
 });

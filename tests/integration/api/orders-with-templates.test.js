@@ -57,7 +57,7 @@ describe('POST /api/orders with templateIds', () => {
     expect(order.name).toBe('Nuntă Test');
     expect(products).toHaveLength(2);
     expect(products.map((p) => p.name).sort()).toEqual(['Invitație clasică', 'Meniu nuntă'].sort());
-    expect(products.every((p) => p.status === 'de_facut')).toBe(true);
+    expect(products.every((p) => p.status === 'de_realizat')).toBe(true);
     expect(products.every((p) => p.orderId === order.id)).toBe(true);
     expect(products[0].templateId).toBeTruthy();
   });

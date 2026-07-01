@@ -29,8 +29,10 @@ function orderRow(page, name) {
 async function openBoard(page, request, opts) {
   const ctx = await setupOrderWithProduct(request, opts);
   await page.goto('/');
-  await orderRow(page, opts.orderName).click();
-  await expect(page.getByTestId('product-board')).toBeVisible();
+  const row = orderRow(page, opts.orderName);
+  await expect(row).toBeVisible({ timeout: 10000 });
+  await row.click();
+  await expect(page.getByTestId('product-board')).toBeVisible({ timeout: 10000 });
   return ctx;
 }
 
@@ -70,11 +72,13 @@ test.describe('product-details', () => {
     await expect(page.getByTestId('product-details-body')).toContainText('Modal via tastatura Space');
   });
 
-  test('card with no additionalInfo does not open a modal on click', async ({ page, request }) => {
+  test('card with no additionalInfo opens modal but hides details body', async ({ page, request }) => {
     await openBoard(page, request, { orderName: 'NoInfo Order', additionalInfo: null });
 
     await page.getByTestId('product-card').first().click();
-    await expect(page.getByTestId('product-details-modal')).toHaveCount(0);
+    await expect(page.getByTestId('product-details-modal')).toBeVisible({ timeout: 1000 });
+    await expect(page.getByTestId('product-details-body')).toHaveCount(0);
+    await expect(page.getByTestId('product-attachment-section')).toBeVisible();
   });
 
   test('modal closes on Escape', async ({ page, request }) => {

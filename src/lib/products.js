@@ -13,6 +13,7 @@ function parseRow(row) {
     quantity: Number(row.quantity ?? 1),
     additionalInfo: row.additional_info ?? null,
     unitPrice: Number(row.unit_price ?? 0),
+    graphicFilePath: row.graphic_file_path ?? null,
     createdAt: row.created_at,
   };
 }
@@ -30,7 +31,7 @@ function createProduct(orderId, name, templateId = null, quantity = 1, additiona
   const id = crypto.randomUUID();
   db.prepare(
     'INSERT INTO products (id, order_id, name, status, template_id, quantity, additional_info, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
-  ).run(id, orderId, name, 'de_facut', templateId, quantity, additionalInfo, now);
+  ).run(id, orderId, name, 'de_realizat', templateId, quantity, additionalInfo, now);
   return parseRow(db.prepare('SELECT * FROM products WHERE id = ?').get(id));
 }
 
@@ -56,6 +57,10 @@ function updateProduct(productId, fields) {
   if (fields.unitPrice !== undefined) {
     setClauses.push('unit_price = ?');
     values.push(fields.unitPrice);
+  }
+  if (fields.graphicFilePath !== undefined) {
+    setClauses.push('graphic_file_path = ?');
+    values.push(fields.graphicFilePath);
   }
   if (setClauses.length === 0) return null;
   values.push(productId);

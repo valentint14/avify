@@ -43,7 +43,7 @@ function makeOrder() {
   return id;
 }
 
-function addProduct(orderId, templateId, quantity, status = 'gata') {
+function addProduct(orderId, templateId, quantity, status = 'realizat') {
   db.prepare(
     'INSERT INTO products (id, order_id, name, status, template_id, quantity, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)'
   ).run(crypto.randomUUID(), orderId, 'P', status, templateId, quantity, new Date().toISOString());
@@ -86,12 +86,12 @@ describe('computeConsumption', () => {
 });
 
 describe('deductStockForOrder', () => {
-  it('deducts when all products are gata', () => {
+  it('deducts when all products are realizat', () => {
     const carton = createMaterial({ name: 'Carton', currentStock: 100 });
     const t = makeTemplate('Invitație');
     replaceRecipe(t, [{ materialId: carton.id, qtyPerPiece: 1 }]);
     const order = makeOrder();
-    addProduct(order, t, 30, 'gata');
+    addProduct(order, t, 30, 'realizat');
 
     const result = deductStockForOrder(order);
     expect(result.deducted).toBe(true);
@@ -103,7 +103,7 @@ describe('deductStockForOrder', () => {
     const t = makeTemplate('Invitație');
     replaceRecipe(t, [{ materialId: carton.id, qtyPerPiece: 1 }]);
     const order = makeOrder();
-    addProduct(order, t, 30, 'printare'); // not gata
+    addProduct(order, t, 30, 'in_realizare'); // not realizat
 
     expect(deductStockForOrder(order).deducted).toBe(false);
     expect(getMaterial(carton.id).currentStock).toBe(100);
@@ -114,7 +114,7 @@ describe('deductStockForOrder', () => {
     const t = makeTemplate('Invitație');
     replaceRecipe(t, [{ materialId: carton.id, qtyPerPiece: 1 }]);
     const order = makeOrder();
-    addProduct(order, t, 30, 'gata');
+    addProduct(order, t, 30, 'realizat');
 
     deductStockForOrder(order);
     const second = deductStockForOrder(order);
@@ -131,7 +131,7 @@ describe('deductStockForOrder', () => {
     const t = makeTemplate('Invitație');
     replaceRecipe(t, [{ materialId: carton.id, qtyPerPiece: 1 }]);
     const order = makeOrder();
-    addProduct(order, t, 30, 'gata');
+    addProduct(order, t, 30, 'realizat');
 
     deductStockForOrder(order);
     expect(getMaterial(carton.id).currentStock).toBe(-25);
@@ -140,7 +140,7 @@ describe('deductStockForOrder', () => {
   it('completes with no deduction when products have no recipe', () => {
     const t = makeTemplate('NoRecipe');
     const order = makeOrder();
-    addProduct(order, t, 10, 'gata');
+    addProduct(order, t, 10, 'realizat');
     const result = deductStockForOrder(order);
     expect(result.deducted).toBe(true);
     expect(result.changes).toEqual({});

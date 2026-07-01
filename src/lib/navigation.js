@@ -3,9 +3,10 @@
 // render order in the bar.
 export const NAV_LINKS = [
   { label: 'Comenzi', href: '/' },
-  { label: 'Catalog Produse', href: '/catalog' },
-  { label: 'Stoc Materiale', href: '/stoc-materiale' },
-  { label: 'Dashboard', href: '/dashboard' },
+  { label: 'Catalog produse', href: '/catalog' },
+  { label: 'Stoc materiale', href: '/stoc-materiale' },
+  { label: 'Calendar', href: '/calendar' },
+  { label: 'Statistici', href: '/dashboard' },
 ];
 
 // A link is active only on an exact pathname match. Partial matches are

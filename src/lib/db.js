@@ -28,11 +28,8 @@ const SCHEMA = `
     id          TEXT NOT NULL PRIMARY KEY,
     order_id    TEXT NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
     name        TEXT NOT NULL,
-    status      TEXT NOT NULL DEFAULT 'de_facut'
-                CHECK (status IN (
-                  'de_facut', 'in_design', 'validare_client',
-                  'printare', 'asamblare', 'gata'
-                )),
+    status      TEXT NOT NULL DEFAULT 'de_realizat'
+                CHECK (status IN ('de_realizat', 'in_realizare', 'realizat')),
     created_at  TEXT NOT NULL
   );
 
@@ -84,6 +81,52 @@ function openDb(filePath) {
   if (!cols.some((c) => c.name === 'unit_price')) {
     db.exec('ALTER TABLE products ADD COLUMN unit_price REAL DEFAULT 0');
   }
+  if (!cols.some((c) => c.name === 'graphic_file_path')) {
+    db.exec('ALTER TABLE products ADD COLUMN graphic_file_path TEXT');
+  }
+
+  // Migrate from 6-stage to 3-stage product workflow
+  const tableRow = db.prepare("SELECT sql FROM sqlite_master WHERE type='table' AND name='products'").get();
+  if (tableRow && tableRow.sql && tableRow.sql.includes("'de_facut'")) {
+    db.exec('PRAGMA foreign_keys = OFF');
+    db.exec(`
+      CREATE TABLE products_new (
+        id                TEXT NOT NULL PRIMARY KEY,
+        order_id          TEXT NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+        name              TEXT NOT NULL,
+        status            TEXT NOT NULL DEFAULT 'de_realizat'
+                          CHECK (status IN ('de_realizat', 'in_realizare', 'realizat')),
+        created_at        TEXT NOT NULL,
+        template_id       TEXT REFERENCES product_templates(id) ON DELETE SET NULL,
+        quantity          INTEGER NOT NULL DEFAULT 1,
+        additional_info   TEXT,
+        unit_price        REAL DEFAULT 0,
+        graphic_file_path TEXT
+      );
+      INSERT INTO products_new
+        SELECT
+          id, order_id, name,
+          CASE status
+            WHEN 'de_facut'        THEN 'de_realizat'
+            WHEN 'in_design'       THEN 'in_realizare'
+            WHEN 'validare_client' THEN 'in_realizare'
+            WHEN 'printare'        THEN 'in_realizare'
+            WHEN 'asamblare'       THEN 'in_realizare'
+            WHEN 'gata'            THEN 'realizat'
+            ELSE 'de_realizat'
+          END,
+          created_at, template_id, COALESCE(quantity, 1), additional_info,
+          COALESCE(unit_price, 0), graphic_file_path
+        FROM products;
+      DROP TABLE products;
+      ALTER TABLE products_new RENAME TO products;
+      CREATE INDEX IF NOT EXISTS idx_products_order_id ON products (order_id);
+      CREATE INDEX IF NOT EXISTS idx_products_status   ON products (status);
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_products_order_template ON products (order_id, template_id) WHERE template_id IS NOT NULL;
+    `);
+    db.exec('PRAGMA foreign_keys = ON');
+  }
+
   db.exec(
     'CREATE UNIQUE INDEX IF NOT EXISTS idx_products_order_template ON products (order_id, template_id) WHERE template_id IS NOT NULL'
   );
