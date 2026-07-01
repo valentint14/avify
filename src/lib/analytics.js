@@ -75,4 +75,26 @@ function getDashboardKPIs() {
   };
 }
 
-module.exports = { getMonthlyProfitData, getTopProducts, getDashboardKPIs };
+function getSalesMapData() {
+  const db = getDb();
+  const rows = db
+    .prepare(
+      `SELECT county,
+              COUNT(*)                 AS deliveredCount,
+              COALESCE(SUM(profit), 0) AS totalProfit
+         FROM orders
+        WHERE delivered = 1
+          AND county IS NOT NULL
+          AND county != ''
+        GROUP BY county
+        ORDER BY county ASC`
+    )
+    .all();
+  return rows.map((r) => ({
+    county: r.county,
+    deliveredCount: Number(r.deliveredCount),
+    totalProfit: Number(r.totalProfit),
+  }));
+}
+
+module.exports = { getMonthlyProfitData, getTopProducts, getDashboardKPIs, getSalesMapData };

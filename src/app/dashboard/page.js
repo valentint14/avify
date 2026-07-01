@@ -3,7 +3,8 @@ import DashboardSkeleton from '@/components/skeletons/DashboardSkeleton';
 import MonthlyProfitChart from '@/components/dashboard/MonthlyProfitChart';
 import TopProductsChart from '@/components/dashboard/TopProductsChart';
 import KpiCard from '@/components/dashboard/KpiCard';
-import { getMonthlyProfitData, getTopProducts, getDashboardKPIs } from '@/lib/analytics';
+import RomaniaSalesMap from '@/components/dashboard/RomaniaSalesMap';
+import { getMonthlyProfitData, getTopProducts, getDashboardKPIs, getSalesMapData } from '@/lib/analytics';
 
 export const metadata = {
   title: 'Statistici — Avify',
@@ -25,6 +26,7 @@ async function DashboardData() {
   const kpis = getDashboardKPIs();
   const monthly = getMonthlyProfitData(12);
   const products = getTopProducts(10);
+  const salesMap = getSalesMapData();
 
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6 p-6">
@@ -55,6 +57,13 @@ async function DashboardData() {
         <h2 className="mb-4 text-lg font-semibold">Cele mai vândute produse</h2>
         <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
           <TopProductsChart data={products} />
+        </div>
+      </section>
+
+      <section aria-label="Harta vânzărilor">
+        <h2 className="mb-4 text-lg font-semibold">Harta vânzărilor</h2>
+        <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
+          <RomaniaSalesMap countyData={salesMap} />
         </div>
       </section>
     </div>
