@@ -11,7 +11,7 @@ import { ATTACHMENT_EXTENSIONS } from '../lib/constants.js';
 
 const ACCEPTED_MIME = '.pdf,.png,.jpg,.jpeg,.webp';
 
-export default function ProductDetailsModal({ product: initialProduct, onClose, onProductUpdated }) {
+export default function ProductDetailsModal({ product: initialProduct, revisionHistory = [], onClose, onProductUpdated, onAttachmentChange }) {
   const [product, setProduct] = useState(initialProduct);
   const [uploadError, setUploadError] = useState(null);
   const [uploading, setUploading] = useState(false);
@@ -50,6 +50,7 @@ export default function ProductDetailsModal({ product: initialProduct, onClose, 
         setUploadError(data.error ?? 'Eroare la încărcare.');
       } else {
         applyUpdate(data.product);
+        onAttachmentChange?.();
       }
     } finally {
       setUploading(false);
@@ -64,6 +65,7 @@ export default function ProductDetailsModal({ product: initialProduct, onClose, 
       setUploadError(data.error ?? 'Eroare la ștergere.');
     } else {
       applyUpdate(data.product);
+      onAttachmentChange?.();
     }
   }
 
@@ -136,6 +138,34 @@ export default function ProductDetailsModal({ product: initialProduct, onClose, 
             aria-label="Selectează fișier grafică"
           />
         </div>
+
+        {revisionHistory.length > 0 && (
+          <div className="border-t border-border pt-3 mt-1">
+            <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Cereri de modificări ({revisionHistory.length})
+            </p>
+            <div className="flex flex-col gap-2 max-h-48 overflow-y-auto">
+              {revisionHistory.map((entry, i) => (
+                <div key={i} className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2">
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 mb-1">
+                    <span className="text-xs text-amber-500">
+                      {new Date(entry.createdAt).toLocaleString('ro-RO', {
+                        day: '2-digit', month: '2-digit', year: 'numeric',
+                        hour: '2-digit', minute: '2-digit',
+                      })}
+                    </span>
+                    {entry.fileName && (
+                      <span className="text-xs text-amber-400 truncate max-w-[180px]" title={entry.fileName}>
+                        {entry.fileName}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-sm text-amber-900 whitespace-pre-wrap">{entry.feedback}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );

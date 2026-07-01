@@ -14,6 +14,7 @@ const ORDER_FIELDS = [
 ];
 
 export async function PATCH(request, { params }) {
+  const { id } = await params;
   try {
     const body = await request.json();
     const fields = {};
@@ -29,7 +30,7 @@ export async function PATCH(request, { params }) {
     if (fields.profit !== undefined && !Number.isFinite(Number(fields.profit))) {
       return Response.json({ error: 'Profitul trebuie să fie un număr.' }, { status: 400 });
     }
-    const order = updateOrder(params.id, fields);
+    const order = updateOrder(id, fields);
     if (!order) return Response.json({ error: 'Comanda nu a fost găsită.' }, { status: 404 });
     return Response.json({ order });
   } catch {
@@ -38,8 +39,9 @@ export async function PATCH(request, { params }) {
 }
 
 export async function DELETE(_req, { params }) {
+  const { id } = await params;
   try {
-    const deleted = deleteOrder(params.id);
+    const deleted = deleteOrder(id);
     if (!deleted) return Response.json({ error: 'Comanda nu a fost găsită.' }, { status: 404 });
     return Response.json({ deleted: true });
   } catch {

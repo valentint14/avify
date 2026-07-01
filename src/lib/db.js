@@ -57,6 +57,36 @@ const SCHEMA = `
 
   CREATE UNIQUE INDEX IF NOT EXISTS idx_recipe_lines_unique   ON recipe_lines (template_id, material_id);
   CREATE INDEX IF NOT EXISTS        idx_recipe_lines_template ON recipe_lines (template_id);
+
+  CREATE TABLE IF NOT EXISTS approval_tokens (
+    id         TEXT NOT NULL PRIMARY KEY,
+    order_id   TEXT NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+    created_at TEXT NOT NULL
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_approval_tokens_order ON approval_tokens (order_id);
+
+  CREATE TABLE IF NOT EXISTS product_approvals (
+    id          TEXT NOT NULL PRIMARY KEY,
+    token_id    TEXT NOT NULL REFERENCES approval_tokens(id) ON DELETE CASCADE,
+    product_id  TEXT NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+    approved_at TEXT NOT NULL
+  );
+
+  CREATE UNIQUE INDEX IF NOT EXISTS idx_product_approvals_unique ON product_approvals (token_id, product_id);
+  CREATE INDEX IF NOT EXISTS        idx_product_approvals_token  ON product_approvals (token_id);
+
+  CREATE TABLE IF NOT EXISTS product_revisions (
+    id         TEXT NOT NULL PRIMARY KEY,
+    token_id   TEXT NOT NULL REFERENCES approval_tokens(id) ON DELETE CASCADE,
+    product_id TEXT NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+    feedback   TEXT NOT NULL,
+    file_name  TEXT,
+    created_at TEXT NOT NULL
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_product_revisions_product ON product_revisions (product_id);
+  CREATE INDEX IF NOT EXISTS idx_product_revisions_token   ON product_revisions (token_id);
 `;
 
 function openDb(filePath) {
@@ -130,6 +160,11 @@ function openDb(filePath) {
   db.exec(
     'CREATE UNIQUE INDEX IF NOT EXISTS idx_products_order_template ON products (order_id, template_id) WHERE template_id IS NOT NULL'
   );
+
+  const revisionCols = db.prepare('PRAGMA table_info(product_revisions)').all();
+  if (revisionCols.length > 0 && !revisionCols.some((c) => c.name === 'file_name')) {
+    db.exec('ALTER TABLE product_revisions ADD COLUMN file_name TEXT');
+  }
 
   // Order metadata fields (feature 006): client, dates, financials, status flags
   const orderCols = db.prepare('PRAGMA table_info(orders)').all();

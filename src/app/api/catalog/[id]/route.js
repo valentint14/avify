@@ -1,6 +1,7 @@
 import { update, deleteById } from '../../../../lib/productTemplates.js';
 
 export async function PATCH(request, { params }) {
+  const { id } = await params;
   try {
     const body = await request.json();
     const fields = {};
@@ -17,7 +18,7 @@ export async function PATCH(request, { params }) {
       fields.description = typeof body.description === 'string' ? body.description.trim() || null : null;
     }
 
-    const template = update(params.id, fields);
+    const template = update(id, fields);
     if (!template) return Response.json({ error: 'Produsul șablon nu a fost găsit.' }, { status: 404 });
     return Response.json({ template });
   } catch {
@@ -26,8 +27,9 @@ export async function PATCH(request, { params }) {
 }
 
 export async function DELETE(_req, { params }) {
+  const { id } = await params;
   try {
-    const deleted = deleteById(params.id);
+    const deleted = deleteById(id);
     if (!deleted) return Response.json({ error: 'Produsul șablon nu a fost găsit.' }, { status: 404 });
     return new Response(null, { status: 204 });
   } catch {

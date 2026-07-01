@@ -3,6 +3,7 @@ import { VALID_STAGES } from '../../../../lib/constants.js';
 import { deductStockForOrder } from '../../../../lib/stock.js';
 
 export async function PATCH(request, { params }) {
+  const { id } = await params;
   try {
     const body = await request.json();
     const hasStatus = typeof body.status === 'string' && body.status.trim() !== '';
@@ -21,10 +22,8 @@ export async function PATCH(request, { params }) {
       if (!VALID_STAGES.includes(status)) {
         return Response.json({ error: 'Status invalid.' }, { status: 400 });
       }
-      product = updateProductStatus(params.id, status);
+      product = updateProductStatus(id, status);
       if (!product) return Response.json({ error: 'Produsul nu a fost găsit.' }, { status: 404 });
-      // A status change may complete the order — deduct material stock once.
-      // Isolated so a deduction error never corrupts the status update response.
       try {
         deductStockForOrder(product.orderId);
       } catch {
@@ -50,7 +49,7 @@ export async function PATCH(request, { params }) {
       if (hasQuantity) fields.quantity = Math.trunc(Number(body.quantity));
       if (hasAdditionalInfo) fields.additionalInfo = body.additionalInfo;
       if (hasUnitPrice) fields.unitPrice = Number(body.unitPrice);
-      product = updateProduct(params.id, fields);
+      product = updateProduct(id, fields);
       if (!product) return Response.json({ error: 'Produsul nu a fost găsit.' }, { status: 404 });
     }
 
@@ -61,8 +60,9 @@ export async function PATCH(request, { params }) {
 }
 
 export async function DELETE(_req, { params }) {
+  const { id } = await params;
   try {
-    const deleted = deleteProduct(params.id);
+    const deleted = deleteProduct(id);
     if (!deleted) return Response.json({ error: 'Produsul nu a fost găsit.' }, { status: 404 });
     return Response.json({ deleted: true });
   } catch {

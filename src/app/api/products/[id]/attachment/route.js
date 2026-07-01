@@ -19,8 +19,9 @@ const MIME_MAP = {
 };
 
 export async function GET(_req, { params }) {
+  const { id } = await params;
   try {
-    const product = getProductById(params.id);
+    const product = getProductById(id);
     if (!product) return Response.json({ error: 'Produsul nu a fost găsit.' }, { status: 404 });
     if (!product.graphicFilePath) return Response.json({ error: 'Niciun fișier atașat.' }, { status: 404 });
 
@@ -46,8 +47,9 @@ export async function GET(_req, { params }) {
 }
 
 export async function POST(request, { params }) {
+  const { id } = await params;
   try {
-    const product = getProductById(params.id);
+    const product = getProductById(id);
     if (!product) return Response.json({ error: 'Produsul nu a fost găsit.' }, { status: 404 });
 
     let formData;
@@ -75,10 +77,9 @@ export async function POST(request, { params }) {
       return Response.json({ error: 'Fișierul depășește limita de 20 MB.' }, { status: 413 });
     }
 
-    const attachDir = path.join(process.cwd(), 'data', 'attachments', params.id);
+    const attachDir = path.join(process.cwd(), 'data', 'attachments', id);
     fs.mkdirSync(attachDir, { recursive: true });
 
-    // Remove any existing file for this product
     for (const existing of fs.readdirSync(attachDir)) {
       fs.unlinkSync(path.join(attachDir, existing));
     }
@@ -87,9 +88,13 @@ export async function POST(request, { params }) {
     const dest = path.join(attachDir, safeName);
     fs.writeFileSync(dest, Buffer.from(bytes));
 
-    const relPath = `attachments/${params.id}/${safeName}`;
-    const updated = updateProduct(params.id, { graphicFilePath: relPath });
+    const relPath = `attachments/${id}/${safeName}`;
+    const updated = updateProduct(id, { graphicFilePath: relPath });
     if (!updated) return Response.json({ error: 'Produsul nu a fost găsit.' }, { status: 404 });
+
+    // New file uploaded — reset approval so client reviews the new design; keep revision history
+    const db = getDb();
+    db.prepare('DELETE FROM product_approvals WHERE product_id = ?').run(id);
 
     return Response.json({ product: updated });
   } catch {
@@ -98,15 +103,16 @@ export async function POST(request, { params }) {
 }
 
 export async function DELETE(_req, { params }) {
+  const { id } = await params;
   try {
-    const product = getProductById(params.id);
+    const product = getProductById(id);
     if (!product) return Response.json({ error: 'Produsul nu a fost găsit.' }, { status: 404 });
     if (!product.graphicFilePath) return Response.json({ error: 'Niciun fișier atașat.' }, { status: 404 });
 
     const absPath = path.join(process.cwd(), 'data', product.graphicFilePath);
     fs.rmSync(absPath, { force: true });
 
-    const updated = updateProduct(params.id, { graphicFilePath: null });
+    const updated = updateProduct(id, { graphicFilePath: null });
     if (!updated) return Response.json({ error: 'Produsul nu a fost găsit.' }, { status: 404 });
 
     return Response.json({ product: updated });

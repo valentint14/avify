@@ -3,6 +3,7 @@ import { update, deleteById } from '../../../../lib/materials.js';
 const FIELDS = ['name', 'currentStock', 'minStock', 'unit'];
 
 export async function PATCH(request, { params }) {
+  const { id } = await params;
   try {
     const body = await request.json();
     const fields = {};
@@ -20,7 +21,7 @@ export async function PATCH(request, { params }) {
         return Response.json({ error: 'Stocul trebuie să fie un număr pozitiv.' }, { status: 400 });
       }
     }
-    const material = update(params.id, fields);
+    const material = update(id, fields);
     if (!material) return Response.json({ error: 'Materialul nu a fost găsit.' }, { status: 404 });
     return Response.json({ material });
   } catch {
@@ -29,8 +30,9 @@ export async function PATCH(request, { params }) {
 }
 
 export async function DELETE(_req, { params }) {
+  const { id } = await params;
   try {
-    const deleted = deleteById(params.id);
+    const deleted = deleteById(id);
     if (!deleted) return Response.json({ error: 'Materialul nu a fost găsit.' }, { status: 404 });
     return Response.json({ deleted: true });
   } catch {

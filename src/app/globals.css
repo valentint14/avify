@@ -106,6 +106,13 @@
 }
 
 
+/* Hide Dialog overlay when printing — the dark backdrop should not appear on paper. */
+@media print {
+  [data-slot="dialog-overlay"] {
+    display: none !important;
+  }
+}
+
 /* Honour users who prefer reduced motion. */
 @media (prefers-reduced-motion: reduce) {
   *,

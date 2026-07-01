@@ -10,8 +10,9 @@ function getProductById(id) {
 }
 
 export async function POST(_req, { params }) {
+  const { id } = await params;
   try {
-    const product = getProductById(params.id);
+    const product = getProductById(id);
     if (!product) return Response.json({ error: 'Produsul nu a fost găsit.' }, { status: 404 });
     if (!product.graphicFilePath) return Response.json({ error: 'Niciun fișier atașat.' }, { status: 404 });
 

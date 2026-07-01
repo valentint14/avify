@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Menu, X } from 'lucide-react';
+import { MoreHorizontal, ChevronUp, Link, Copy, Check } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -10,11 +10,36 @@ export default function OrderRow({ order, isExpanded, onToggle, onEdit }) {
   const statusLabel = order.status === 'finalizata' ? 'Finalizată' : 'În progres';
   const statusVariant = order.status === 'finalizata' ? 'status-finalizata' : 'status-in-progres';
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [approvalLink, setApprovalLink] = useState(null);
+  const [linkLoading, setLinkLoading] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  async function handleGenerateLink(e) {
+    e.stopPropagation();
+    setLinkLoading(true);
+    try {
+      const res = await fetch(`/api/orders/${order.id}/approval-token`, { method: 'POST' });
+      if (res.ok) {
+        const { token } = await res.json();
+        setApprovalLink(`${window.location.origin}/aprobare/${token.id}`);
+        setCopied(false);
+      }
+    } finally {
+      setLinkLoading(false);
+    }
+  }
+
+  async function handleCopy(e) {
+    e.stopPropagation();
+    await navigator.clipboard.writeText(approvalLink);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
 
   return (
     <div
       className={cn(
-        'flex flex-col px-4 py-3 cursor-pointer transition-colors outline-none hover:bg-accent/50 focus-visible:ring-2 focus-visible:ring-ring md:flex-row md:items-center md:gap-x-2',
+        'flex flex-col cursor-pointer transition-colors outline-none hover:bg-accent/50 focus-visible:ring-2 focus-visible:ring-ring',
         isExpanded ? 'rounded-t-lg bg-accent/50' : 'rounded-lg'
       )}
       data-testid="order-row"
@@ -30,73 +55,103 @@ export default function OrderRow({ order, isExpanded, onToggle, onEdit }) {
       }}
     >
       {/* Primary row — always visible */}
-      <div className="flex min-w-0 flex-1 items-center gap-2">
+      <div className="flex min-w-0 items-center gap-2 px-4 py-2.5">
         <span className="w-3.5 shrink-0 text-xs text-muted-foreground">
           {isExpanded ? '▼' : '▶'}
         </span>
-        <span className="truncate text-base font-medium text-foreground">{order.name}</span>
+        <span className="min-w-0 flex-1 truncate text-sm font-medium text-foreground">{order.name}</span>
         <Badge variant={statusVariant} data-testid="order-status" data-status={order.status}>
           {statusLabel}
         </Badge>
-        <div className="flex shrink-0 items-center gap-1.5">
-          <Badge
-            variant={order.collected ? 'active' : 'muted'}
-            data-testid="order-badge-collected"
-            data-active={order.collected ? 'true' : 'false'}
-          >
-            Încasată
-          </Badge>
-          <Badge
-            variant={order.delivered ? 'active' : 'muted'}
-            data-testid="order-badge-delivered"
-            data-active={order.delivered ? 'true' : 'false'}
-          >
-            Livrată
-          </Badge>
-        </div>
-
-        {/* Hamburger — mobile only */}
         <button
           type="button"
-          className="ml-auto shrink-0 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground md:hidden"
+          className="shrink-0 rounded-md p-1 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
           aria-label={detailsOpen ? 'Ascunde detalii' : 'Arată detalii'}
           aria-expanded={detailsOpen}
           onClick={(e) => { e.stopPropagation(); setDetailsOpen((o) => !o); }}
         >
-          {detailsOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+          {detailsOpen ? <ChevronUp className="h-4 w-4" /> : <MoreHorizontal className="h-4 w-4" />}
         </button>
       </div>
 
-      {/* Details row — collapsed on mobile by default, always visible on desktop */}
+      {/* Secondary row — revealed by ⋯ button */}
       <div
         className={cn(
-          'shrink-0 pl-5 md:flex md:flex-row md:flex-wrap md:items-center md:gap-x-4 md:gap-y-1 md:pl-0',
-          detailsOpen ? 'mt-2 flex flex-col gap-y-2' : 'hidden',
+          'grid transition-[grid-template-rows] duration-200 ease-in-out',
+          (detailsOpen || isExpanded) ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
         )}
       >
-        <div className="rounded-md border border-border px-3 py-1.5 text-center text-sm" data-testid="order-total">
-          <span className="text-muted-foreground">Total: </span>
-          <span className="font-medium text-foreground">{Number(order.total ?? 0).toFixed(2)} RON</span>
-        </div>
-        <div className="rounded-md border border-border px-3 py-1.5 text-center text-sm text-muted-foreground" data-testid="order-profit">
-          Profit: {Number(order.profit ?? 0).toFixed(2)} RON
-        </div>
-        <div className="rounded-md border border-border px-3 py-1.5 text-center text-sm text-muted-foreground" data-testid="product-summary">
-          {order.doneCount} / {order.productCount} realizate
-        </div>
-        <Button
-          variant="outline"
-          size="sm"
-          className="w-full md:w-auto"
-          data-testid="order-edit"
-          aria-label={`Editează produsele din comanda ${order.name}`}
-          onClick={(e) => {
-            e.stopPropagation();
-            onEdit(order.id);
-          }}
+        <div className="overflow-hidden">
+        <div
+          className="flex flex-col gap-1.5 border-t border-border px-4 py-2.5 md:flex-row md:flex-wrap md:items-center md:justify-between md:gap-x-3 md:gap-y-1.5"
+          onClick={(e) => e.stopPropagation()}
         >
-          Editează
-        </Button>
+          <div
+            className={cn('w-full rounded-md border px-3 py-2 text-center text-sm md:w-auto', order.collected ? 'border-green-300 bg-green-50 text-green-800' : 'border-border text-muted-foreground')}
+            data-testid="order-badge-collected"
+            data-active={order.collected ? 'true' : 'false'}
+          >
+            Încasată
+          </div>
+          <div
+            className={cn('w-full rounded-md border px-3 py-2 text-center text-sm md:w-auto', order.delivered ? 'border-green-300 bg-green-50 text-green-800' : 'border-border text-muted-foreground')}
+            data-testid="order-badge-delivered"
+            data-active={order.delivered ? 'true' : 'false'}
+          >
+            Livrată
+          </div>
+          <div className="w-full rounded-md border border-border px-3 py-2 text-center text-sm md:w-auto" data-testid="order-total">
+            <span className="text-muted-foreground">Total: </span>
+            <span className="font-medium text-foreground">{Number(order.total ?? 0).toFixed(2)} RON</span>
+          </div>
+          <div className="w-full rounded-md border border-border px-3 py-2 text-center text-sm text-muted-foreground md:w-auto" data-testid="order-profit">
+            Profit: {Number(order.profit ?? 0).toFixed(2)} RON
+          </div>
+          <div className="w-full rounded-md border border-border px-3 py-2 text-center text-sm text-muted-foreground md:w-auto" data-testid="product-summary">
+            {order.doneCount} / {order.productCount} realizate
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full md:w-auto"
+            data-testid="order-edit"
+            aria-label={`Editează produsele din comanda ${order.name}`}
+            onClick={(e) => { e.stopPropagation(); onEdit(order.id); }}
+          >
+            Editează
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full md:w-auto"
+            data-testid="order-generate-link"
+            disabled={linkLoading}
+            onClick={handleGenerateLink}
+          >
+            <Link className="h-3.5 w-3.5 mr-1.5" />
+            {linkLoading ? 'Se generează…' : 'Link aprobare'}
+          </Button>
+          {approvalLink && (
+            <div
+              className="flex w-full items-center gap-2 rounded-md border border-border px-3 py-2"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Link className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+              <span className="min-w-0 flex-1 truncate font-mono text-xs text-muted-foreground" title={approvalLink}>
+                {approvalLink}
+              </span>
+              <button
+                type="button"
+                className="shrink-0 rounded p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
+                aria-label={copied ? 'Copiat!' : 'Copiază link'}
+                onClick={handleCopy}
+              >
+                {copied ? <Check className="h-3.5 w-3.5 text-green-600" /> : <Copy className="h-3.5 w-3.5" />}
+              </button>
+            </div>
+          )}
+        </div>
+        </div>
       </div>
     </div>
   );

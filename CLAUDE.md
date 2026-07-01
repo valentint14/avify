@@ -1,5 +1,5 @@
 <!-- SPECKIT START -->
 For additional context about technologies to be used, project structure,
 shell commands, and other important information, read the current plan
-at specs/013-production-mode/plan.md
+at specs/015-client-design-approval/plan.md
 <!-- SPECKIT END -->

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import ProductCard from './ProductCard.js';
 import { cn } from '@/lib/utils';
 
-export default function ProductColumn({ stage, products, onDrop, onDeleteProduct }) {
+export default function ProductColumn({ stage, products, approvedProductIds = new Set(), revisionsMap = {}, onDrop, onDeleteProduct, onAttachmentChange, onMoveProduct }) {
   const [isDragOver, setIsDragOver] = useState(false);
 
   function handleDragOver(e) {
@@ -32,7 +32,7 @@ export default function ProductColumn({ stage, products, onDrop, onDeleteProduct
   return (
     <div
       className={cn(
-        'flex min-w-[160px] flex-1 flex-col rounded-md border-2 bg-card transition-colors',
+        'flex w-full flex-col rounded-md border-2 bg-card transition-colors md:min-w-[160px] md:flex-1',
         isDragOver ? 'border-blue-500 bg-blue-50' : 'border-border'
       )}
       data-testid="product-column"
@@ -50,7 +50,15 @@ export default function ProductColumn({ stage, products, onDrop, onDeleteProduct
           <p className="px-1 py-2 text-xs text-muted-foreground" data-testid="product-column-empty">Niciun produs în această coloană</p>
         )}
         {products.map((product) => (
-          <ProductCard key={product.id} product={product} onDelete={onDeleteProduct} />
+          <ProductCard
+            key={product.id}
+            product={product}
+            isApproved={approvedProductIds.has(product.id)}
+            revisionHistory={revisionsMap[product.id] ?? []}
+            onDelete={onDeleteProduct}
+            onAttachmentChange={onAttachmentChange}
+            onMoveProduct={onMoveProduct}
+          />
         ))}
       </div>
     </div>

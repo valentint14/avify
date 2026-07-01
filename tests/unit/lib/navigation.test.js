@@ -9,6 +9,7 @@ describe('navigation links', () => {
       { label: 'Catalog produse', href: '/catalog' },
       { label: 'Stoc materiale', href: '/stoc-materiale' },
       { label: 'Calendar', href: '/calendar' },
+      { label: 'Mod producție', href: '/mod-productie' },
       { label: 'Statistici', href: '/dashboard' },
     ]);
   });

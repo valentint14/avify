@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import MaterialForm from './MaterialForm.js';
+import ShoppingListModal from './ShoppingListModal.js';
 import { lowStockMaterials, isLowStock } from '../lib/lowStock.js';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -22,6 +23,7 @@ export default function MaterialsPage({ initialMaterials }) {
   const [materials, setMaterials] = useState(initialMaterials);
   const [editingId, setEditingId] = useState(null);
   const [error, setError] = useState('');
+  const [showShoppingList, setShowShoppingList] = useState(false);
 
   const lowStock = useMemo(() => lowStockMaterials(materials), [materials]);
 
@@ -73,12 +75,25 @@ export default function MaterialsPage({ initialMaterials }) {
 
   return (
     <div className="mx-auto flex max-w-4xl flex-col gap-4 p-6">
-      <div className="flex flex-col gap-1">
-        <h1 className="text-xl font-bold tracking-tight text-foreground">Stoc Materiale</h1>
-        <p className="text-sm text-muted-foreground">
-          Gestionează materiile prime și pragurile minime de stoc.
-        </p>
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex flex-col gap-1">
+          <h1 className="text-xl font-bold tracking-tight text-foreground">Stoc Materiale</h1>
+          <p className="text-sm text-muted-foreground">
+            Gestionează materiile prime și pragurile minime de stoc.
+          </p>
+        </div>
+        <Button
+          onClick={() => setShowShoppingList(true)}
+          data-testid="generate-shopping-list-btn"
+          className="shrink-0"
+        >
+          Generează listă cumpărături
+        </Button>
       </div>
+      <ShoppingListModal
+        open={showShoppingList}
+        onClose={() => setShowShoppingList(false)}
+      />
 
       {lowStock.length > 0 && (
         <div
